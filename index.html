@@ -1,0 +1,580 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.app{font-family:'Segoe UI',Tahoma,sans-serif;direction:rtl;min-height:600px;transition:background 0.4s,color 0.4s;}
+
+/* ── THEMES ── */
+.t-emerald{--bg:#f0f7f4;--bg2:#e1f0ea;--card:#ffffff;--hdr1:#1a4d32;--hdr2:#2e7d52;--acc:#2e7d52;--acc2:#4caf80;--acc3:#e1f0ea;--gold:#b8860b;--goldbg:#fdf6dc;--txt:#1e3028;--muted:#5a7a65;--bdr:rgba(46,125,82,0.13);}
+.t-rose{--bg:#fdf6f8;--bg2:#fce8ee;--card:#ffffff;--hdr1:#6b2038;--hdr2:#a0345a;--acc:#a0345a;--acc2:#d4537e;--acc3:#fce8ee;--gold:#9b6914;--goldbg:#fdf0dc;--txt:#3d1422;--muted:#8a4a60;--bdr:rgba(160,52,90,0.12);}
+.t-indigo{--bg:#f2f3fb;--bg2:#e4e6f7;--card:#ffffff;--hdr1:#1e2260;--hdr2:#3a3fa8;--acc:#3a3fa8;--acc2:#6b72d4;--acc3:#e4e6f7;--gold:#9b7a14;--goldbg:#fdf3dc;--txt:#1a1d4a;--muted:#5a5f9a;--bdr:rgba(58,63,168,0.12);}
+.t-sand{--bg:#faf7f0;--bg2:#f0e8d4;--card:#ffffff;--hdr1:#5c3d1e;--hdr2:#8c5e2a;--acc:#8c5e2a;--acc2:#c4894a;--acc3:#f0e8d4;--gold:#8c6414;--goldbg:#fdf4dc;--txt:#3a2610;--muted:#7a5a38;--bdr:rgba(140,94,42,0.13);}
+
+/* DARK variants */
+.t-emerald.dark{--bg:#0e1f16;--bg2:#152a1e;--card:#1a2e22;--hdr1:#0e1f16;--hdr2:#1a3d28;--acc:#4caf80;--acc2:#6dc99a;--acc3:#152a1e;--gold:#e0b94a;--goldbg:#2a2010;--txt:#c8e8d8;--muted:#6aaa88;--bdr:rgba(76,175,128,0.15);}
+.t-rose.dark{--bg:#1f0e14;--bg2:#2e1520;--card:#2a1820;--hdr1:#1f0e14;--hdr2:#3d1a28;--acc:#d4537e;--acc2:#e87aa0;--acc3:#2e1520;--gold:#e0b44a;--goldbg:#2a1e0e;--txt:#f0d0da;--muted:#b0708a;--bdr:rgba(212,83,126,0.15);}
+.t-indigo.dark{--bg:#0e0f1f;--bg2:#161830;--card:#1a1c38;--hdr1:#0e0f1f;--hdr2:#1e2060;--acc:#6b72d4;--acc2:#9098e8;--acc3:#161830;--gold:#e0c04a;--goldbg:#221c08;--txt:#d0d4f8;--muted:#8088c0;--bdr:rgba(107,114,212,0.15);}
+.t-sand.dark{--bg:#1a1208;--bg2:#271a0e;--card:#2a1e10;--hdr1:#1a1208;--hdr2:#2e1e0c;--acc:#c4894a;--acc2:#d8a870;--acc3:#271a0e;--gold:#e0c04a;--goldbg:#221808;--txt:#f0dfc0;--muted:#a08050;--bdr:rgba(196,137,74,0.15);}
+
+.app{background:var(--bg);color:var(--txt);}
+
+/* THEME PICKER */
+.theme-bar{display:flex;gap:8px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bdr);align-items:center;justify-content:space-between;flex-wrap:wrap;}
+.theme-dots{display:flex;gap:8px;align-items:center;}
+.tdot{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.2s;flex-shrink:0;}
+.tdot.active{border-color:var(--txt);transform:scale(1.15);}
+.tdot.d-emerald{background:#2e7d52;}
+.tdot.d-rose{background:#a0345a;}
+.tdot.d-indigo{background:#3a3fa8;}
+.tdot.d-sand{background:#8c5e2a;}
+.dark-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;border:1px solid var(--bdr);border-radius:20px;padding:5px 12px;background:var(--card);}
+.dark-toggle:hover{background:var(--bg2);}
+.toggle-icon{font-size:15px;}
+
+/* HEADER */
+.header{background:var(--hdr2);padding:1.4rem 1.2rem 1rem;text-align:center;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;top:-20px;right:-20px;width:90px;height:90px;border:1.5px solid rgba(255,255,255,0.08);border-radius:50%;}
+.header::after{content:'';position:absolute;bottom:-30px;left:10px;width:70px;height:70px;border:1.5px solid rgba(255,255,255,0.06);border-radius:50%;}
+.app-name{color:#f5e6a3;font-size:22px;font-weight:800;letter-spacing:2px;}
+.app-sub{color:rgba(255,255,255,0.6);font-size:12px;margin-top:2px;}
+
+/* NAV */
+.nav{display:flex;background:var(--card);border-bottom:1px solid var(--bdr);}
+.nb{flex:1;padding:10px 4px;background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;direction:rtl;}
+.nb.active{color:var(--acc);border-bottom-color:var(--acc);font-weight:700;}
+
+/* SECTIONS */
+.sec{display:none;padding:1rem;}
+.sec.active{display:block;}
+
+/* LOGIN */
+.login-card{background:var(--card);border-radius:16px;border:1px solid var(--bdr);padding:1.4rem;margin-bottom:1rem;}
+.field-label{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.txt-input{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:12px;font-size:15px;background:var(--bg);color:var(--txt);outline:none;text-align:right;direction:rtl;margin-bottom:10px;transition:border 0.2s;}
+.txt-input:focus{border-color:var(--acc);}
+.btn-main{background:var(--acc);color:#fff;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity 0.2s;}
+.btn-main:hover{opacity:0.85;}
+
+/* USER TAG */
+.user-tag{display:flex;align-items:center;gap:10px;background:var(--acc3);border-radius:14px;padding:10px 14px;margin-bottom:1rem;border:1px solid var(--bdr);}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;flex-shrink:0;}
+.user-info{flex:1;}
+.uname{font-weight:700;font-size:15px;color:var(--txt);}
+.usub{font-size:12px;color:var(--muted);}
+.streak-badge{background:var(--acc);color:#fff;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;}
+.btn-sm{background:transparent;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--muted);cursor:pointer;}
+
+/* DHIKR */
+.dhikr-center{display:flex;flex-direction:column;align-items:center;gap:12px;padding:0.5rem 0 1rem;}
+.ring-wrap{position:relative;width:150px;height:150px;}
+.btn-dhikr{width:140px;height:140px;border-radius:50%;border:3px solid var(--acc2);background:var(--card);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:transform 0.12s;position:absolute;top:5px;left:5px;}
+.btn-dhikr:active{transform:scale(0.9);}
+.btn-dhikr .ar{font-size:12px;color:var(--acc);font-weight:700;}
+.btn-dhikr .num{font-size:38px;font-weight:900;color:var(--txt);line-height:1;}
+.progress-svg{position:absolute;top:0;left:0;width:150px;height:150px;transform:rotate(-90deg);}
+.pbg{fill:none;stroke:var(--bg2);stroke-width:6;}
+.pbar{fill:none;stroke:var(--acc2);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 0.3s;}
+.ripple{position:absolute;border-radius:50%;border:2px solid var(--acc2);width:140px;height:140px;top:5px;left:5px;animation:rpl 0.6s ease-out forwards;pointer-events:none;}
+@keyframes rpl{0%{transform:scale(1);opacity:0.7}100%{transform:scale(1.5);opacity:0}}
+
+/* GOAL */
+.goal-row{display:flex;align-items:center;gap:8px;justify-content:center;}
+.goal-label{font-size:13px;color:var(--muted);}
+.goal-select{border:1px solid var(--bdr);border-radius:8px;padding:4px 10px;font-size:13px;color:var(--txt);background:var(--bg);cursor:pointer;}
+.goal-bar-wrap{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;width:200px;margin:6px auto 4px;}
+.goal-bar{height:100%;background:var(--acc2);border-radius:99px;transition:width 0.4s;}
+.goal-txt{font-size:12px;color:var(--muted);text-align:center;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.stat-box{background:var(--acc3);border-radius:12px;padding:10px 12px;text-align:center;border:1px solid var(--bdr);}
+.stat-box .sv{font-size:22px;font-weight:800;color:var(--acc);}
+.stat-box .sl{font-size:11px;color:var(--muted);margin-top:2px;}
+.stat-box.gold{background:var(--goldbg);border-color:rgba(184,134,11,0.15);}
+.stat-box.gold .sv{color:var(--gold);}
+
+/* CARD */
+.card{background:var(--card);border-radius:16px;border:1px solid var(--bdr);padding:1.2rem;margin-bottom:1rem;}
+.ct{font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.dot{width:6px;height:6px;background:var(--acc2);border-radius:50%;flex-shrink:0;}
+
+/* HADITH */
+.hadith-box{background:var(--goldbg);border:1px solid rgba(184,134,11,0.15);border-radius:14px;padding:14px;margin-bottom:1rem;text-align:center;}
+.hadith-text{font-size:14px;color:var(--txt);line-height:1.9;font-weight:500;}
+.hadith-src{font-size:11px;color:var(--muted);margin-top:5px;}
+
+/* LB */
+.lb-item{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--bdr);}
+.lb-item:last-child{border-bottom:none;}
+.lb-rank{width:24px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.lb-name{flex:1;font-size:14px;color:var(--txt);font-weight:500;}
+.lb-cnt{font-size:13px;color:var(--acc);font-weight:700;}
+.lb-item.me{background:var(--acc3);border-radius:10px;padding:9px 8px;}
+.lb-scroll{max-height:220px;overflow-y:auto;}
+
+/* SABHA */
+.sabha-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:0.5rem 0;}
+.sabha-counter{font-size:56px;font-weight:900;color:var(--acc);}
+.sabha-phase{font-size:13px;color:var(--muted);}
+.sabha-phases{display:flex;gap:8px;justify-content:center;}
+.phase-dot{width:10px;height:10px;border-radius:50%;background:var(--bg2);transition:background 0.3s;}
+.phase-dot.done{background:var(--acc);}
+.phase-dot.active{background:var(--acc2);box-shadow:0 0 0 3px var(--acc3);}
+.btn-sabha{width:110px;height:110px;border-radius:50%;background:var(--acc);color:#fff;border:none;cursor:pointer;font-size:16px;font-weight:800;transition:transform 0.12s;}
+.btn-sabha:active{transform:scale(0.88);}
+.btn-reset-sabha{background:transparent;border:1px solid var(--bdr);border-radius:10px;padding:7px 20px;color:var(--muted);font-size:13px;cursor:pointer;}
+.sabha-done-msg{background:var(--goldbg);border:1px solid rgba(184,134,11,0.2);border-radius:14px;padding:12px;text-align:center;font-size:13px;color:var(--gold);font-weight:600;display:none;}
+
+/* FADHIL */
+.fadhil-bar{display:flex;align-items:center;gap:8px;background:var(--acc3);border-radius:10px;padding:8px 12px;margin-bottom:8px;border:1px solid var(--bdr);}
+.fadhil-bar .fb-icon{font-size:16px;}
+.fadhil-bar .fb-name{flex:1;font-size:13px;color:var(--txt);font-weight:500;}
+.fadhil-bar .fb-time{font-size:12px;color:var(--muted);}
+.fadhil-bar.active-time{background:var(--goldbg);border-color:rgba(184,134,11,0.2);}
+.fadhil-bar.active-time .fb-name{color:var(--gold);}
+
+/* BOTS */
+.bot-row{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--bdr);}
+.bot-row:last-child{border-bottom:none;}
+.bot-avatar{width:32px;height:32px;border-radius:50%;background:var(--acc3);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;border:1px solid var(--bdr);}
+.bot-name{flex:1;font-size:13px;color:var(--txt);font-weight:500;}
+.bot-cnt{font-size:12px;color:var(--acc);font-weight:700;}
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:var(--bg2);border-radius:20px;cursor:pointer;transition:.3s;}
+.slider:before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+input:checked+.slider{background:var(--acc);}
+input:checked+.slider:before{transform:translateX(16px);}
+
+.ornament{text-align:center;color:var(--acc2);font-size:16px;margin:6px 0 0;opacity:0.4;letter-spacing:4px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg2);border-radius:4px;}
+</style>
+
+<div class="app t-emerald" id="app">
+
+  <!-- THEME BAR -->
+  <div class="theme-bar">
+    <div class="theme-dots">
+      <div class="tdot d-emerald active" onclick="setTheme('emerald',this)" title="زمردي"></div>
+      <div class="tdot d-rose" onclick="setTheme('rose',this)" title="وردي"></div>
+      <div class="tdot d-indigo" onclick="setTheme('indigo',this)" title="نيلي"></div>
+      <div class="tdot d-sand" onclick="setTheme('sand',this)" title="رملي"></div>
+      <span style="font-size:11px;color:var(--muted);">اختاري ثيمك</span>
+    </div>
+    <button class="dark-toggle" onclick="toggleDark()" id="dark-btn">
+      <span class="toggle-icon">🌙</span>
+      <span id="dark-lbl">ليلي</span>
+    </button>
+  </div>
+
+  <div class="header">
+    <div class="app-name">مزن ✦ للاستغفار</div>
+    <div class="app-sub">منصة الذكر التشاركية</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login-view">
+    <div style="padding:1rem;">
+      <div class="hadith-box" style="margin-top:0.5rem;">
+        <div class="hadith-text" id="hadith-login">﴿ فَقُلۡتُ ٱسۡتَغۡفِرُواْ رَبَّكُمۡ إِنَّهُۥ كَانَ غَفَّارٗا ﴾</div>
+        <div class="hadith-src">نوح: ١٠</div>
+      </div>
+      <div class="login-card">
+        <div class="field-label">اسمك الكريم</div>
+        <input class="txt-input" id="name-input" type="text" placeholder="أدخل اسمك..." maxlength="20" dir="rtl"/>
+        <button class="btn-main" onclick="doLogin()">← دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main-view" style="display:none;">
+    <div class="nav">
+      <button class="nb active" onclick="showTab('home',this)">🏠 الرئيسية</button>
+      <button class="nb" onclick="showTab('sabha',this)">📿 السبحة</button>
+      <button class="nb" onclick="showTab('stats',this)">📊 الإحصائيات</button>
+      <button class="nb" onclick="showTab('settings',this)">⚙️ الإعدادات</button>
+    </div>
+
+    <!-- HOME -->
+    <div class="sec active" id="tab-home">
+      <div style="padding-top:0.5rem;">
+        <div class="user-tag">
+          <button class="btn-sm" onclick="doLogout()">خروج</button>
+          <div class="user-info">
+            <div class="uname" id="disp-name"></div>
+            <div class="usub" id="disp-sub">اليوم: ٠</div>
+          </div>
+          <div class="streak-badge" id="streak-badge">🔥 ١ يوم</div>
+          <div class="avatar" id="avatar-l">م</div>
+        </div>
+
+        <div class="hadith-box">
+          <div class="hadith-text" id="hadith-main">﴿ وَٱلَّذِينَ إِذَا فَعَلُواْ فَٰحِشَةً أَوۡ ظَلَمُوٓاْ أَنفُسَهُمۡ ذَكَرُواْ ٱللَّهَ فَٱسۡتَغۡفَرُواْ ﴾</div>
+          <div class="hadith-src" id="hadith-src-main">آل عمران: ١٣٥</div>
+        </div>
+
+        <div class="card">
+          <div class="ct"><span class="dot"></span>اضغط للاستغفار</div>
+          <div class="dhikr-center">
+            <div class="ring-wrap" id="ring-wrap">
+              <svg class="progress-svg" viewBox="0 0 150 150">
+                <circle class="pbg" cx="75" cy="75" r="68"/>
+                <circle class="pbar" id="prog-circle" cx="75" cy="75" r="68" stroke-dasharray="427" stroke-dashoffset="427"/>
+              </svg>
+              <button class="btn-dhikr" onclick="doIstighfar()">
+                <span class="ar">أستغفر الله</span>
+                <span class="num" id="my-count">0</span>
+              </button>
+            </div>
+            <div style="text-align:center;">
+              <div class="goal-row">
+                <span class="goal-label">الهدف اليومي:</span>
+                <select class="goal-select" id="goal-sel" onchange="saveGoal()">
+                  <option value="33">٣٣</option>
+                  <option value="100" selected>١٠٠</option>
+                  <option value="333">٣٣٣</option>
+                  <option value="1000">١٠٠٠</option>
+                </select>
+              </div>
+              <div class="goal-bar-wrap"><div class="goal-bar" id="goal-bar" style="width:0%"></div></div>
+              <div class="goal-txt" id="goal-txt">٠ / ١٠٠</div>
+            </div>
+          </div>
+          <div class="ornament">❧ ✦ ❧</div>
+        </div>
+
+        <div class="card">
+          <div class="ct"><span class="dot"></span>أوقات الفضل</div>
+          <div id="fadhil-times"></div>
+        </div>
+
+        <div class="card">
+          <div class="ct"><span class="dot"></span>المستغفرون اليوم</div>
+          <div class="lb-scroll" id="lb-home"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SABHA -->
+    <div class="sec" id="tab-sabha">
+      <div class="card" style="text-align:center;margin-top:0.5rem;">
+        <div class="ct" style="justify-content:center;"><span class="dot"></span>سبحة الاستغفار</div>
+        <div class="sabha-wrap">
+          <div class="sabha-counter" id="sabha-num">0</div>
+          <div class="sabha-phase" id="sabha-phase-txt">أستغفر الله — ٣٣ مرة</div>
+          <div class="sabha-phases">
+            <div class="phase-dot active" id="pd0"></div>
+            <div class="phase-dot" id="pd1"></div>
+            <div class="phase-dot" id="pd2"></div>
+          </div>
+          <button class="btn-sabha" onclick="doSabha()">سبّح</button>
+          <div class="sabha-done-msg" id="sabha-done">✦ اكتمل التسبيح الثلاثي — بارك الله فيك ✦</div>
+          <button class="btn-reset-sabha" onclick="resetSabha()">↺ إعادة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="sec" id="tab-stats">
+      <div style="margin-top:0.5rem;">
+        <div class="card">
+          <div class="ct"><span class="dot"></span>إحصائياتي</div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="sv" id="my-today-s">0</div><div class="sl">استغفاري اليوم</div></div>
+            <div class="stat-box"><div class="sv" id="my-week-s">0</div><div class="sl">هذا الأسبوع</div></div>
+            <div class="stat-box gold" style="grid-column:1/-1;"><div class="sv" id="my-total-s">0</div><div class="sl">إجمالي استغفاري</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="dot"></span>إحصائيات الأمة</div>
+          <div class="stats-grid">
+            <div class="stat-box"><div class="sv" id="s-today">0</div><div class="sl">اليوم</div></div>
+            <div class="stat-box"><div class="sv" id="s-week">0</div><div class="sl">الأسبوع</div></div>
+            <div class="stat-box"><div class="sv" id="s-month">0</div><div class="sl">الشهر</div></div>
+            <div class="stat-box"><div class="sv" id="s-year">0</div><div class="sl">العام</div></div>
+            <div class="stat-box gold" style="grid-column:1/-1;"><div class="sv" id="s-total">0</div><div class="sl">الإجمالي الكلي</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="dot"></span>لوحة الشرف — اليوم</div>
+          <div class="lb-scroll" id="lb-stats"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="sec" id="tab-settings">
+      <div style="margin-top:0.5rem;">
+        <div class="card">
+          <div class="ct"><span class="dot"></span>الثيم واللون</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="theme-opt" onclick="setTheme('emerald',null)" style="background:#e1f0ea;border:2px solid transparent;border-radius:12px;padding:10px;cursor:pointer;text-align:center;" id="to-emerald">
+              <div style="width:24px;height:24px;border-radius:50%;background:#2e7d52;margin:0 auto 6px;"></div>
+              <div style="font-size:12px;color:#1a4d32;font-weight:600;">زمردي</div>
+            </div>
+            <div class="theme-opt" onclick="setTheme('rose',null)" style="background:#fce8ee;border:2px solid transparent;border-radius:12px;padding:10px;cursor:pointer;text-align:center;" id="to-rose">
+              <div style="width:24px;height:24px;border-radius:50%;background:#a0345a;margin:0 auto 6px;"></div>
+              <div style="font-size:12px;color:#6b2038;font-weight:600;">وردي</div>
+            </div>
+            <div class="theme-opt" onclick="setTheme('indigo',null)" style="background:#e4e6f7;border:2px solid transparent;border-radius:12px;padding:10px;cursor:pointer;text-align:center;" id="to-indigo">
+              <div style="width:24px;height:24px;border-radius:50%;background:#3a3fa8;margin:0 auto 6px;"></div>
+              <div style="font-size:12px;color:#1e2260;font-weight:600;">نيلي</div>
+            </div>
+            <div class="theme-opt" onclick="setTheme('sand',null)" style="background:#f0e8d4;border:2px solid transparent;border-radius:12px;padding:10px;cursor:pointer;text-align:center;" id="to-sand">
+              <div style="width:24px;height:24px;border-radius:50%;background:#8c5e2a;margin:0 auto 6px;"></div>
+              <div style="font-size:12px;color:#5c3d1e;font-weight:600;">رملي</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="dark-toggle" style="width:100%;justify-content:center;" onclick="toggleDark()">
+              <span id="dark-icon2">🌙</span> <span id="dark-lbl2">تفعيل الوضع الليلي</span>
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="dot"></span>البوتات المشاركة</div>
+          <div id="bots-list"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">تستغفر تلقائياً كل فترة</div>
+        </div>
+        <div class="card">
+          <div class="ct"><span class="dot"></span>الهدف اليومي</div>
+          <div class="goal-row">
+            <span class="goal-label">اختاري:</span>
+            <select class="goal-select" id="goal-sel2" onchange="saveGoal2()">
+              <option value="33">٣٣</option>
+              <option value="100" selected>١٠٠</option>
+              <option value="333">٣٣٣</option>
+              <option value="1000">١٠٠٠</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOTS=[{name:'ملاك الفجر',icon:'🌅',interval:45000,min:1,max:5},{name:'مسبّح الليل',icon:'🌙',interval:62000,min:2,max:8},{name:'ذاكر الضحى',icon:'☀️',interval:80000,min:1,max:4}];
+const BOT_KEY='bot-enabled-mzn';
+const botEnabled=JSON.parse(localStorage.getItem(BOT_KEY)||'{"0":true,"1":true,"2":true}');
+const HADITHS=[
+  {text:'﴿ فَقُلۡتُ ٱسۡتَغۡفِرُواْ رَبَّكُمۡ إِنَّهُۥ كَانَ غَفَّارٗا ﴾',src:'نوح: ١٠'},
+  {text:'"من أكثر من الاستغفار جعل الله له من كل ضيق مخرجاً"',src:'أبو داود'},
+  {text:'﴿ وَٱسۡتَغۡفِرۡ لِذَنۢبِكَ وَسَبِّحۡ بِحَمۡدِ رَبِّكَ ﴾',src:'غافر: ٥٥'},
+  {text:'"سيد الاستغفار: اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك"',src:'البخاري'},
+  {text:'﴿ وَمَن يَعۡمَلۡ سُوٓءًا أَوۡ يَظۡلِمۡ نَفۡسَهُۥ ثُمَّ يَسۡتَغۡفِرِ ٱللَّهَ ﴾',src:'النساء: ١١٠'},
+];
+const FADHIL=[{name:'بعد الفجر',icon:'🌅',hour:4,end:7},{name:'صلاة الضحى',icon:'☀️',hour:9,end:11},{name:'بعد الظهر',icon:'🕛',hour:12,end:13},{name:'قبل المغرب',icon:'🌇',hour:16,end:18},{name:'ليلة الجمعة',icon:'🌙',special:'friday'}];
+
+let me=null, sabhaCount=0, sabhaPhase=0, goalVal=100;
+let currentTheme=localStorage.getItem('mzn-theme')||'emerald';
+let isDark=localStorage.getItem('mzn-dark')==='1';
+
+function toAr(n){if(n>=1000000)return (n/1000000).toFixed(1)+'م';if(n>=1000)return (n/1000).toFixed(1)+'ك';return n.toString();}
+function dateKey(d){return d.toISOString().slice(0,10);}
+function weekKey(d){const j=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-j)/86400000+j.getDay()+1)/7);}
+function monthKey(d){return d.toISOString().slice(0,7);}
+function yearKey(d){return ''+d.getFullYear();}
+
+async function load(){try{const r=await window.storage.get('mzn-data2',true);return r?JSON.parse(r.value):{users:{},entries:[],streaks:{}};}catch(e){return {users:{},entries:[],streaks:{}};}}
+async function save(d){try{await window.storage.set('mzn-data2',JSON.stringify(d),true);}catch(e){}}
+
+function setTheme(t,dot){
+  currentTheme=t;
+  localStorage.setItem('mzn-theme',t);
+  const app=document.getElementById('app');
+  app.className='app t-'+t+(isDark?' dark':'');
+  document.querySelectorAll('.tdot').forEach(d=>d.classList.remove('active'));
+  if(dot) dot.classList.add('active');
+  else document.querySelector('.tdot.d-'+t)?.classList.add('active');
+  document.querySelectorAll('.theme-opt').forEach(o=>o.style.borderColor='transparent');
+  const to=document.getElementById('to-'+t);
+  if(to) to.style.borderColor=isDark?'#888':'#333';
+}
+
+function toggleDark(){
+  isDark=!isDark;
+  localStorage.setItem('mzn-dark',isDark?'1':'0');
+  const app=document.getElementById('app');
+  app.className='app t-'+currentTheme+(isDark?' dark':'');
+  const lbl=isDark?'نهاري':'ليلي';
+  const icon=isDark?'☀️':'🌙';
+  document.getElementById('dark-lbl').textContent=lbl;
+  document.getElementById('dark-icon2').textContent=icon;
+  document.getElementById('dark-lbl2').textContent=isDark?'تفعيل الوضع النهاري':'تفعيل الوضع الليلي';
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  refreshUI();
+}
+
+async function doLogin(){
+  const n=document.getElementById('name-input').value.trim();
+  if(!n)return;
+  me=n; sessionStorage.setItem('mzn-user2',n);
+  const d=await load();
+  if(!d.users[me]) d.users[me]=0;
+  await save(d);
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('main-view').style.display='block';
+  document.getElementById('disp-name').textContent=me;
+  document.getElementById('avatar-l').textContent=me[0];
+  goalVal=parseInt(localStorage.getItem('mzn-goal')||'100');
+  document.getElementById('goal-sel').value=goalVal;
+  document.getElementById('goal-sel2').value=goalVal;
+  renderFadhil(); renderBots(); renderHadith();
+  await refreshUI();
+  startBotTimers();
+}
+
+function doLogout(){me=null;sessionStorage.removeItem('mzn-user2');document.getElementById('main-view').style.display='none';document.getElementById('login-view').style.display='block';}
+
+async function doIstighfar(){
+  if(!me)return;
+  const wrap=document.getElementById('ring-wrap');
+  const rpl=document.createElement('div');rpl.className='ripple';wrap.appendChild(rpl);setTimeout(()=>rpl.remove(),650);
+  const d=await load();
+  if(!d.users[me]) d.users[me]=0;
+  d.users[me]++;
+  if(!d.entries) d.entries=[];
+  d.entries.push({user:me,ts:new Date().toISOString()});
+  if(d.entries.length>100000) d.entries=d.entries.slice(-100000);
+  updateStreak(d);
+  await save(d);
+  await refreshUI(d);
+}
+
+function updateStreak(d){
+  if(!d.streaks) d.streaks={};
+  const today=dateKey(new Date()); const s=d.streaks[me]||{last:'',count:0};
+  const yesterday=dateKey(new Date(Date.now()-86400000));
+  if(s.last===today)return;
+  s.count=(s.last===yesterday)?s.count+1:1; s.last=today; d.streaks[me]=s;
+}
+
+function saveGoal(){goalVal=parseInt(document.getElementById('goal-sel').value);localStorage.setItem('mzn-goal',goalVal);document.getElementById('goal-sel2').value=goalVal;refreshUI();}
+function saveGoal2(){goalVal=parseInt(document.getElementById('goal-sel2').value);localStorage.setItem('mzn-goal',goalVal);document.getElementById('goal-sel').value=goalVal;refreshUI();}
+
+async function refreshUI(d){
+  if(!d) d=await load();
+  if(!me) return;
+  const now=new Date();
+  const tk=dateKey(now),wk=weekKey(now),mk=monthKey(now),yk=yearKey(now);
+  let todayT=0,weekT=0,monthT=0,yearT=0,grand=0,myToday=0,myWeek=0;
+  const uToday={};
+  for(const e of (d.entries||[])){
+    const ed=new Date(e.ts); grand++;
+    if(dateKey(ed)===tk){todayT++;uToday[e.user]=(uToday[e.user]||0)+1;}
+    if(weekKey(ed)===wk)weekT++;
+    if(monthKey(ed)===mk)monthT++;
+    if(yearKey(ed)===yk)yearT++;
+    if(e.user===me){if(dateKey(ed)===tk)myToday++;if(weekKey(ed)===wk)myWeek++;}
+  }
+  const myTotal=d.users[me]||0;
+  const streak=(d.streaks&&d.streaks[me])?d.streaks[me].count:1;
+  document.getElementById('my-count').textContent=toAr(myToday);
+  document.getElementById('disp-sub').textContent='اليوم: '+myToday;
+  document.getElementById('streak-badge').textContent='🔥 '+streak+' '+(streak===1?'يوم':'أيام');
+  const pct=Math.min(100,Math.round(myToday/goalVal*100));
+  document.getElementById('goal-bar').style.width=pct+'%';
+  document.getElementById('goal-txt').textContent=myToday+' / '+goalVal;
+  document.getElementById('prog-circle').style.strokeDashoffset=427-(427*pct/100);
+  document.getElementById('s-today').textContent=toAr(todayT);
+  document.getElementById('s-week').textContent=toAr(weekT);
+  document.getElementById('s-month').textContent=toAr(monthT);
+  document.getElementById('s-year').textContent=toAr(yearT);
+  document.getElementById('s-total').textContent=toAr(grand);
+  document.getElementById('my-today-s').textContent=toAr(myToday);
+  document.getElementById('my-week-s').textContent=toAr(myWeek);
+  document.getElementById('my-total-s').textContent=toAr(myTotal);
+  renderLB(uToday,'lb-home');renderLB(uToday,'lb-stats');
+}
+
+function renderLB(uToday,elId){
+  const sorted=Object.entries(uToday).sort((a,b)=>b[1]-a[1]);
+  const el=document.getElementById(elId);
+  if(!sorted.length){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:14px;">لا أحد استغفر اليوم بعد!</div>';return;}
+  el.innerHTML=sorted.map(([name,cnt],i)=>{
+    const m=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+    return `<div class="lb-item${name===me?' me':''}">${name===me?'<span style="font-size:10px;color:var(--acc);">أنتِ</span>':''}<span class="lb-rank">${m}</span><span class="lb-name">${name}</span><span class="lb-cnt">${toAr(cnt)}</span></div>`;
+  }).join('');
+}
+
+function renderFadhil(){
+  const now=new Date();const h=now.getHours();const isFri=now.getDay()===5;
+  document.getElementById('fadhil-times').innerHTML=FADHIL.map(f=>{
+    const active=f.special==='friday'?isFri:(h>=f.hour&&h<f.end);
+    return `<div class="fadhil-bar${active?' active-time':''}"><span class="fb-icon">${f.icon}</span><span class="fb-name">${f.name}</span><span class="fb-time">${active?'🟢 الآن':''}</span></div>`;
+  }).join('');
+}
+
+function renderBots(){
+  document.getElementById('bots-list').innerHTML=BOTS.map((b,i)=>`
+    <div class="bot-row">
+      <div class="bot-avatar">${b.icon}</div>
+      <span class="bot-name">${b.name}</span>
+      <span class="bot-cnt" id="bot-cnt-${i}">٠</span>
+      <label class="toggle"><input type="checkbox" ${botEnabled[i]?'checked':''} onchange="toggleBot(${i},this.checked)"><span class="slider"></span></label>
+    </div>`).join('');
+}
+
+function toggleBot(i,v){botEnabled[i]=v;localStorage.setItem(BOT_KEY,JSON.stringify(botEnabled));}
+
+function renderHadith(){
+  const h=HADITHS[Math.floor(Date.now()/86400000)%HADITHS.length];
+  const el=document.getElementById('hadith-main');const es=document.getElementById('hadith-src-main');
+  if(el){el.textContent=h.text;es.textContent=h.src;}
+}
+
+async function startBotTimers(){
+  for(let i=0;i<BOTS.length;i++){
+    const b=BOTS[i];
+    setInterval(async()=>{
+      if(!botEnabled[i])return;
+      const d=await load();
+      const n=b.min+Math.floor(Math.random()*(b.max-b.min+1));
+      if(!d.users[b.name]) d.users[b.name]=0;
+      d.users[b.name]+=n;
+      for(let j=0;j<n;j++) d.entries.push({user:b.name,ts:new Date().toISOString()});
+      if(d.entries.length>100000) d.entries=d.entries.slice(-100000);
+      await save(d);
+      if(me) await refreshUI(d);
+    },b.interval+(Math.random()*15000|0));
+  }
+  setInterval(()=>{if(me){renderFadhil();refreshUI();}},12000);
+}
+
+function doSabha(){
+  const phases=['أستغفر الله — ٣٣ مرة','الحمد لله — ٣٣ مرة','الله أكبر — ٣٣ مرة'];
+  sabhaCount++;
+  if(sabhaCount>33){sabhaCount=1;sabhaPhase++;}
+  if(sabhaPhase>=3){document.getElementById('sabha-done').style.display='block';document.querySelector('.btn-sabha').style.opacity='0.3';return;}
+  document.getElementById('sabha-num').textContent=sabhaCount;
+  document.getElementById('sabha-phase-txt').textContent=phases[sabhaPhase];
+  for(let i=0;i<3;i++){const d=document.getElementById('pd'+i);d.className='phase-dot'+(i<sabhaPhase?' done':i===sabhaPhase?' active':'');}
+  if(sabhaCount===33&&sabhaPhase<2) doIstighfar();
+}
+
+function resetSabha(){
+  sabhaCount=0;sabhaPhase=0;
+  document.getElementById('sabha-num').textContent='0';
+  document.getElementById('sabha-phase-txt').textContent='أستغفر الله — ٣٣ مرة';
+  document.getElementById('sabha-done').style.display='none';
+  document.querySelector('.btn-sabha').style.opacity='1';
+  for(let i=0;i<3;i++) document.getElementById('pd'+i).className='phase-dot'+(i===0?' active':'');
+}
+
+(()=>{
+  setTheme(currentTheme,null);
+  if(isDark) toggleDark();
+  const s=sessionStorage.getItem('mzn-user2');
+  if(s){document.getElementById('name-input').value=s;doLogin();}
+})();
+</script>
