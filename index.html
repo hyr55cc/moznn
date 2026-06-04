@@ -115,6 +115,10 @@ body{margin:0;background:var(--bg);transition:background .6s ease;}
 .lb-row{display:flex;align-items:center;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:background .5s,border-color .5s,transform .4s cubic-bezier(.34,1.2,.64,1);}
 @keyframes slideIn{0%{opacity:0;transform:translateX(20px)}100%{opacity:1;transform:translateX(0)}}
 .lb-row.me3{border-color:var(--gold2);background:rgba(200,152,10,0.08);}
+.lb-row.pulse-active{animation:activePulse 2s ease-in-out infinite!important;}
+@keyframes activePulse{0%,100%{box-shadow:0 0 0 0 var(--glow);border-color:var(--gold2);}50%{box-shadow:0 0 16px 2px var(--glow);border-color:var(--gold3);}}
+@keyframes scorePop{0%{transform:scale(1);color:var(--gold3);}40%{transform:scale(1.35);color:var(--green3);}100%{transform:scale(1);}}
+.lb-score{display:inline-block;}
 .lb-rank-badge{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--txt);flex-shrink:0;transition:color .6s;}
 .lb-rank-badge.r1{background:var(--gold2);color:#0a1a0f!important;}
 .lb-rank-badge.r2{background:#909098;color:#fff!important;}
@@ -534,43 +538,71 @@ function renderLB(){
   else{data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:u.total||0}));}
   data=data.filter(d=>d.s>0).sort((a,b)=>b.s-a.s).slice(0,50);
   const el=$("lb-list");$("lb-count").textContent=data.length+" مستغفر";
-  if(!data.length){el.innerHTML="<div style='padding:20px;text-align:center;color:var(--muted);font-size:13px;'>لا يوجد بيانات بعد</div>";return;}
 
-  // Build a map of existing rows by user name
+  if(!data.length){el.innerHTML="<div style='padding:20px;text-align:center;color:var(--muted);font-size:13px;'>لا يوجد بيانات بعد</div>";return;}
+  if(el.querySelector("div:not(.lb-row)"))el.innerHTML="";
+
+  // map existing rows
   const existing={};
   el.querySelectorAll(".lb-row[data-user]").forEach(r=>{existing[r.getAttribute("data-user")]=r;});
 
-  // Remove the empty-state placeholder if present
-  if(el.querySelector("div:not(.lb-row)")) el.innerHTML="";
+  // FLIP step 1: record old positions
+  const firstPos={};
+  Object.keys(existing).forEach(u=>{firstPos[u]=existing[u].getBoundingClientRect().top;});
 
+  // build/update rows in correct order
+  const ordered=[];
   data.forEach((d,i)=>{
     const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
     const isMe=d.n===me;
     let row=existing[d.n];
     if(row){
-      // Update in place — no rebuild, no re-animation
       const badge=row.querySelector(".lb-rank-badge");
+      if(badge.textContent!=String(i+1)){badge.textContent=i+1;}
       badge.className="lb-rank-badge "+rc;
-      badge.textContent=(i+1);
-      row.querySelector(".lb-score").textContent=toAr(d.s);
-      row.className="lb-row"+(isMe?" me3":"");
+      const sc=row.querySelector(".lb-score");
+      const newScore=toAr(d.s);
+      if(sc.textContent!==newScore){
+        sc.textContent=newScore;
+        sc.style.animation="none";void sc.offsetWidth;sc.style.animation="scorePop .4s ease";
+      }
+      row.className="lb-row"+(isMe?" me3":"")+(isMe?" pulse-active":"");
       delete existing[d.n];
     }else{
-      // New user — create row (animate only this one)
       row=document.createElement("div");
-      row.className="lb-row"+(isMe?" me3":"");
+      row.className="lb-row"+(isMe?" me3 pulse-active":"");
       row.setAttribute("data-user",d.n);
+      row.innerHTML="<div class='lb-rank-badge "+rc+"'>"+(i+1)+"</div><span class='lb-name'>"+(isMe?"🟢 ":"")+d.n+(isMe?" ✦":"")+"</span><span class='lb-score'>"+toAr(d.s)+"</span>";
       row.style.animation="slideIn .4s ease";
-      row.innerHTML="<div class='lb-rank-badge "+rc+"'>"+(i+1)+"</div><span class='lb-name'>"+d.n+(isMe?" ✦":"")+"</span><span class='lb-score'>"+toAr(d.s)+"</span>";
     }
-    // Re-append in correct order (DOM reorders smoothly)
-    el.appendChild(row);
+    ordered.push(row);
   });
 
-  // Remove rows for users no longer in the list
+  // remove gone rows
   Object.values(existing).forEach(r=>r.remove());
-}
 
+  // reorder DOM only where needed
+  ordered.forEach((row,i)=>{
+    if(el.children[i]!==row) el.insertBefore(row,el.children[i]||null);
+  });
+
+  // FLIP step 2: animate from old to new position
+  ordered.forEach(row=>{
+    const u=row.getAttribute("data-user");
+    if(firstPos[u]!==undefined){
+      const last=row.getBoundingClientRect().top;
+      const delta=firstPos[u]-last;
+      if(Math.abs(delta)>1){
+        row.style.transition="none";
+        row.style.transform="translateY("+delta+"px)";
+        requestAnimationFrame(()=>{
+          row.style.transition="transform .5s cubic-bezier(.34,1.2,.64,1)";
+          row.style.transform="";
+        });
+      }
+    }
+  });
+}
 function setLbTab(tab,key){document.querySelectorAll(".lb-tab").forEach(t=>t.classList.remove("on"));tab.classList.add("on");lbTab=key;renderLB();}
 
 function doLogin(){
