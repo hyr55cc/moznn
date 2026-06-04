@@ -266,13 +266,235 @@ input:checked+.sl::before{transform:translateX(16px);}
 .gsc-fill { height: 100%; background: linear-gradient(90deg, var(--green2), var(--green)); transition: width .3s; }
 
 /* contact footer */
-.contact-footer { padding: 20px 14px 14px; margin-top: 20px; border-top: 1px solid var(--bdr); }
-.contact-title { font-size: 16px; font-weight: 800; color: var(--txt); margin-bottom: 6px; }
-.contact-msg { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
-.contact-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--bdr); border-radius: 10px; background: var(--card2); color: var(--txt); font-family: inherit; font-size: 13px; resize: vertical; min-height: 80px; outline: none; }
-.contact-textarea::placeholder { color: var(--muted); }
-.contact-btn { width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--green2), var(--green)); color: #fff; font-weight: 700; cursor: pointer; font-size: 13px; }
-.contact-btn:active { transform: scale(.96); }
+.contact-footer { 
+  padding: 20px 14px 14px; 
+  margin-top: 20px; 
+  border-top: 1px solid var(--bdr); 
+  display: flex;
+  justify-content: center;
+}
+
+.contact-btn-elegant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.contact-btn-elegant:active { 
+  transform: scale(.96);
+}
+
+.contact-icon {
+  font-size: 18px;
+}
+
+.contact-text {
+  letter-spacing: 0.3px;
+}
+
+/* Contact Modal */
+.contact-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.contact-modal {
+  background: var(--bg);
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp .3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-modal-header {
+  padding: 20px 20px;
+  border-bottom: 1px solid var(--bdr);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--txt);
+  font-weight: 800;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--card);
+  border-radius: 8px;
+  color: var(--txt);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+
+.close-btn:active {
+  background: var(--card2);
+}
+
+.contact-modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt2);
+}
+
+.contact-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--bdr);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--txt);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.contact-input:focus {
+  border-color: var(--green2);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.contact-textarea-modal {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--bdr);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--txt);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.contact-textarea-modal:focus {
+  border-color: var(--green2);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.contact-textarea-modal::placeholder {
+  color: var(--muted);
+}
+
+.success-message {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  animation: slideIn .3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--bdr);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.contact-modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all .2s;
+}
+
+.contact-modal-btn.cancel {
+  background: var(--card);
+  color: var(--txt);
+  border: 1px solid var(--bdr);
+}
+
+.contact-modal-btn.cancel:active {
+  transform: scale(.96);
+}
+
+.contact-modal-btn.send {
+  background: linear-gradient(135deg, var(--green2), var(--green));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.contact-modal-btn.send:active {
+  transform: scale(.96);
+}
 
 /* ===================== logo ===================== */
 .app-logo {
@@ -597,6 +819,8 @@ window.toAr = function (n) {
       };
     });
     var all = [me].concat(others);
+    // تصفية المستخدمين الذين لا يملكون أي استغفار في الفئة المحددة
+    all = all.filter(function (u) { return u[metric] > 0; });
     all.sort(function (a, b) { return (b[metric] || 0) - (a[metric] || 0); });
     all.forEach(function (u, i) { u.rank = i + 1; });
     return all;
@@ -751,6 +975,11 @@ window.toAr = function (n) {
     worldTotal: function () {
       var s = state ? state.me.total : 0;
       if (state) for (var i = 0; i < state.others.length; i++) s += (state.others[i].total || 0);
+      return s;
+    },
+    dailyTotal: function () {
+      var s = state ? state.me.today : 0;
+      if (state) for (var i = 0; i < state.others.length; i++) s += (state.others[i].today || 0);
       return s;
     },
     myRank: function (metric) {
@@ -1503,13 +1732,92 @@ function LeaderboardInline({ st, onProfile }) {
 
 // Contact Us footer (shown on all pages)
 function ContactFooter() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+
+  function handleSubmit() {
+    if (subject.trim() && message.trim()) {
+      // Here you would send the message to your backend
+      console.log("رسالة مرسلة:", { subject, message });
+      setSent(true);
+      setTimeout(() => {
+        setSent(false);
+        setSubject("");
+        setMessage("");
+        setIsOpen(false);
+      }, 1500);
+    }
+  }
+
   return (
-    <div className="contact-footer">
-      <div className="contact-title">📞 تواصل معنا</div>
-      <div className="contact-msg">نهتم لملاحظاتكم ورأيكم — ساعدونا نحسّن التطبيق</div>
-      <textarea className="contact-textarea" placeholder="أخبرنا برأيك أو ملاحظتك..."></textarea>
-      <button className="contact-btn">إرسال الملاحظة</button>
-    </div>
+    <>
+      <div className="contact-footer">
+        <button 
+          className="contact-btn-elegant"
+          onClick={() => setIsOpen(true)}
+        >
+          <span className="contact-icon">💬</span>
+          <span className="contact-text">تواصل معنا</span>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="contact-modal-overlay" onClick={() => setIsOpen(false)}>
+          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="contact-modal-header">
+              <h2>تواصل معنا</h2>
+              <button 
+                className="close-btn"
+                onClick={() => setIsOpen(false)}
+              >✕</button>
+            </div>
+            
+            <div className="contact-modal-body">
+              <div className="form-group">
+                <label>الموضوع</label>
+                <input
+                  type="text"
+                  className="contact-input"
+                  placeholder="ما موضوع رسالتك؟"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>الرسالة</label>
+                <textarea
+                  className="contact-textarea-modal"
+                  placeholder="أخبرنا برأيك أو ملاحظتك..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows="5"
+                />
+              </div>
+
+              {sent && (
+                <div className="success-message">
+                  ✓ تم إرسال رسالتك بنجاح — شكراً لك
+                </div>
+              )}
+            </div>
+
+            <div className="contact-modal-footer">
+              <button 
+                className="contact-modal-btn cancel"
+                onClick={() => setIsOpen(false)}
+              >إلغاء</button>
+              <button 
+                className="contact-modal-btn send"
+                onClick={handleSubmit}
+              >إرسال</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1562,6 +1870,7 @@ function CounterPage({ st, anim, shape, openShare, onProfile, fx }) {
       <div className="stats-strip">
         <StatCell val={fmt(me.today)} lbl="استغفارك اليوم" />
         <StatCell val={fmtK(me.total)} lbl="إجماليك" />
+        <StatCell val={fmtK(MoznStore.dailyTotal())} lbl="الإجمالي اليومي" />
         <StatCell val={fmtK(world)} lbl="إجمالي العالم" />
       </div>
 
