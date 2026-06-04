@@ -112,7 +112,7 @@ body{margin:0;background:var(--bg);transition:background .6s ease;}
 .lb-tabs{display:flex;background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:12px;}
 .lb-tab{flex:1;padding:9px 4px;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;border:none;background:transparent;font-weight:600;transition:all .25s;}
 .lb-tab.on{background:var(--green);color:#fff;font-weight:800;}
-.lb-row{display:flex;align-items:center;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:all .5s,transform .2s;animation:slideIn .4s ease backwards;}
+.lb-row{display:flex;align-items:center;background:var(--card);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:background .5s,border-color .5s,transform .4s cubic-bezier(.34,1.2,.64,1);}
 @keyframes slideIn{0%{opacity:0;transform:translateX(20px)}100%{opacity:1;transform:translateX(0)}}
 .lb-row.me3{border-color:var(--gold2);background:rgba(200,152,10,0.08);}
 .lb-rank-badge{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--txt);flex-shrink:0;transition:color .6s;}
@@ -532,14 +532,43 @@ function renderLB(){
   if(lbTab==="today"){const ut={};Object.values(cacheEntries).forEach(e=>{if(e&&e.user)ut[e.user]=(ut[e.user]||0)+1;});data=Object.entries(ut).map(([n,s])=>({n,s}));}
   else if(lbTab==="week"){const wk=wKey(now);data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:(u.week&&u.week[wk])||0}));}
   else{data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:u.total||0}));}
-  data=data.filter(d=>d.s>0).sort((a,b)=>b.s-a.s);
+  data=data.filter(d=>d.s>0).sort((a,b)=>b.s-a.s).slice(0,50);
   const el=$("lb-list");$("lb-count").textContent=data.length+" مستغفر";
   if(!data.length){el.innerHTML="<div style='padding:20px;text-align:center;color:var(--muted);font-size:13px;'>لا يوجد بيانات بعد</div>";return;}
-  el.innerHTML=data.slice(0,50).map((d,i)=>{
+
+  // Build a map of existing rows by user name
+  const existing={};
+  el.querySelectorAll(".lb-row[data-user]").forEach(r=>{existing[r.getAttribute("data-user")]=r;});
+
+  // Remove the empty-state placeholder if present
+  if(el.querySelector("div:not(.lb-row)")) el.innerHTML="";
+
+  data.forEach((d,i)=>{
     const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
     const isMe=d.n===me;
-    return "<div class='lb-row"+(isMe?" me3":"")+"' style='animation-delay:"+(i*0.03)+"s'><div class='lb-rank-badge "+rc+"'>"+(i+1)+"</div><span class='lb-name'>"+d.n+(isMe?" ✦":"")+"</span><span class='lb-score'>"+toAr(d.s)+"</span></div>";
-  }).join("");
+    let row=existing[d.n];
+    if(row){
+      // Update in place — no rebuild, no re-animation
+      const badge=row.querySelector(".lb-rank-badge");
+      badge.className="lb-rank-badge "+rc;
+      badge.textContent=(i+1);
+      row.querySelector(".lb-score").textContent=toAr(d.s);
+      row.className="lb-row"+(isMe?" me3":"");
+      delete existing[d.n];
+    }else{
+      // New user — create row (animate only this one)
+      row=document.createElement("div");
+      row.className="lb-row"+(isMe?" me3":"");
+      row.setAttribute("data-user",d.n);
+      row.style.animation="slideIn .4s ease";
+      row.innerHTML="<div class='lb-rank-badge "+rc+"'>"+(i+1)+"</div><span class='lb-name'>"+d.n+(isMe?" ✦":"")+"</span><span class='lb-score'>"+toAr(d.s)+"</span>";
+    }
+    // Re-append in correct order (DOM reorders smoothly)
+    el.appendChild(row);
+  });
+
+  // Remove rows for users no longer in the list
+  Object.values(existing).forEach(r=>r.remove());
 }
 
 function setLbTab(tab,key){document.querySelectorAll(".lb-tab").forEach(t=>t.classList.remove("on"));tab.classList.add("on");lbTab=key;renderLB();}
