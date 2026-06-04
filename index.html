@@ -97,7 +97,7 @@ body{margin:0;background:#0a1a0f;}
 .welcome{font-size:13px;color:var(--muted);margin-top:4px;}
 
 /* STATS STRIP */
-.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 14px 16px;}
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 14px 16px;}
 .ss{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:12px 8px;text-align:center;}
 .ss-val{font-size:20px;font-weight:900;color:var(--txt);line-height:1;}
 .ss-lbl{font-size:9px;color:var(--muted);margin-top:5px;}
@@ -109,7 +109,7 @@ body{margin:0;background:#0a1a0f;}
 
 /* BIG BUTTON */
 .btn-wrap{display:flex;flex-direction:column;align-items:center;padding:0 20px 20px;}
-.btn-outer{touch-action:manipulation;
+.btn-outer{touch-action:manipulation;user-select:none;-webkit-user-select:none;
   width:300px;height:300px;border-radius:50%;
   background:var(--green);
   box-shadow:0 0 0 8px rgba(26,122,64,0.2),0 0 0 16px rgba(26,122,64,0.08),0 20px 60px rgba(0,0,0,0.4);
@@ -118,17 +118,9 @@ body{margin:0;background:#0a1a0f;}
   -webkit-tap-highlight-color:transparent;
 }
 .btn-outer:active{transform:scale(.93);}
-.btn-counter{
-  position:absolute;top:-6px;right:-6px;
-  width:44px;height:44px;border-radius:50%;
-  background:var(--gold2);color:#0a1a0f;
-  font-size:16px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  border:3px solid var(--bg);
-  font-variant-numeric:tabular-nums;
-}
-.btn-ar{font-size:40px;color:#fff;font-weight:900;line-height:1.2;text-align:center;}
-.btn-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
+.btn-counter{display:none;}
+.btn-ar{font-size:40px;color:#fff;font-weight:900;line-height:1.2;text-align:center;user-select:none;-webkit-user-select:none;pointer-events:none;}
+.btn-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;user-select:none;-webkit-user-select:none;pointer-events:none;}
 .ripple3{position:absolute;border-radius:50%;border:2px solid rgba(61,204,120,0.5);width:300px;height:300px;top:0;left:0;animation:rpl3 .9s ease-out forwards;pointer-events:none;}
 @keyframes rpl3{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.65);opacity:0}}
 
@@ -210,7 +202,7 @@ body{margin:0;background:#0a1a0f;}
 .cfg-page{padding:14px 14px 100px;}
 .cfg-card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;margin-bottom:12px;}
 .cfg-title{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
-.th-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.th-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
 .th-opt{border:1.5px solid var(--bdr);border-radius:10px;padding:10px 6px;cursor:pointer;text-align:center;background:var(--card2);}
 .th-sw{width:22px;height:22px;border-radius:50%;margin:0 auto 5px;}
 .th-lbl{font-size:10px;font-weight:700;color:var(--txt2);}
@@ -258,7 +250,6 @@ input:checked+.sl::before{transform:translateX(16px);}
 
   <div class="stats-strip">
     <div class="ss"><div class="ss-val" id="ss-today">0</div><div class="ss-lbl">🌙 اليوم</div></div>
-    <div class="ss"><div class="ss-val" id="ss-streak">0</div><div class="ss-lbl">🔥 متتالية</div></div>
     <div class="ss"><div class="ss-val" id="ss-total">0</div><div class="ss-lbl">🏆 الإجمالي</div></div>
     <div class="ss"><div class="ss-val" id="ss-grand">0</div><div class="ss-lbl">🌍 العالم</div></div>
   </div>
@@ -270,7 +261,6 @@ input:checked+.sl::before{transform:translateX(16px);}
 
   <div class="btn-wrap">
     <button class="btn-outer" id="main-btn" onclick="doIstighfar()">
-      <div class="btn-counter" id="btn-count">0</div>
       <div class="btn-ar">أَسْتَغْفِرُ<br>اللَّه</div>
       <div class="btn-sub">اضغط للاستغفار</div>
     </button>
@@ -562,7 +552,7 @@ function renderUI(){
   const uToday={};Object.values(cacheEntries).forEach(e=>{if(e&&e.user)uToday[e.user]=(uToday[e.user]||0)+1;});
   const rank=Object.values(uToday).filter(v=>v>myToday).length+1;
 
-  $("btn-count").textContent=myToday;
+  
   $("ss-today").textContent=toAr(myToday);
   $("ss-total").textContent=toAr(myTotal);
   $("ss-grand").textContent=toAr(grand);
