@@ -2045,13 +2045,91 @@ function ProfileSheet({ id, onClose }) {
 }
 
 function ContactFooter() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+
+  function handleSubmit() {
+    if (subject.trim() && message.trim()) {
+      console.log("رسالة مرسلة:", { subject, message });
+      setSent(true);
+      setTimeout(() => {
+        setSent(false);
+        setSubject("");
+        setMessage("");
+        setIsOpen(false);
+      }, 1500);
+    }
+  }
+
   return (
-    <div className="contact-footer">
-      <div className="contact-title">📞 تواصل معنا</div>
-      <div className="contact-msg">نهتم لملاحظاتكم ورأيكم — ساعدونا نحسّن التطبيق</div>
-      <textarea className="contact-textarea" placeholder="أخبرنا برأيك أو ملاحظتك..."></textarea>
-      <button className="contact-btn">إرسال الملاحظة</button>
-    </div>
+    <>
+      <div className="contact-footer">
+        <button 
+          className="contact-btn-elegant"
+          onClick={() => setIsOpen(true)}
+        >
+          <span className="contact-icon">💬</span>
+          <span className="contact-text">تواصل معنا</span>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="contact-modal-overlay" onClick={() => setIsOpen(false)}>
+          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="contact-modal-header">
+              <h2>تواصل معنا</h2>
+              <button 
+                className="close-btn"
+                onClick={() => setIsOpen(false)}
+              >✕</button>
+            </div>
+            
+            <div className="contact-modal-body">
+              <div className="form-group">
+                <label>الموضوع</label>
+                <input
+                  type="text"
+                  className="contact-input"
+                  placeholder="ما موضوع رسالتك؟"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>الرسالة</label>
+                <textarea
+                  className="contact-textarea-modal"
+                  placeholder="أخبرنا برأيك أو ملاحظتك..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows="5"
+                />
+              </div>
+
+              {sent && (
+                <div className="success-message">
+                  ✓ تم إرسال رسالتك بنجاح — شكراً لك
+                </div>
+              )}
+            </div>
+
+            <div className="contact-modal-footer">
+              <button 
+                className="contact-modal-btn cancel"
+                onClick={() => setIsOpen(false)}
+              >إلغاء</button>
+              <button 
+                className="contact-modal-btn send"
+                onClick={handleSubmit}
+              >إرسال</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
