@@ -56,7 +56,7 @@ body{margin:0;background:var(--bg);transition:background .6s ease;}
 .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:0 14px 16px;}
 .ss{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:13px 8px;text-align:center;transition:all .5s,transform .2s;}
 .ss:active{transform:scale(.97);}
-.ss-val{font-size:21px;font-weight:900;color:var(--txt);line-height:1;font-variant-numeric:tabular-nums;transition:color .6s;}
+.ss-val{font-size:19px;font-weight:900;color:var(--txt);line-height:1.1;font-variant-numeric:tabular-nums;transition:color .6s;word-break:break-all;}
 .ss-lbl{font-size:10px;color:var(--muted);margin-top:5px;}
 
 /* ── DAILY AYAH ── */
@@ -129,9 +129,14 @@ body{margin:0;background:var(--bg);transition:background .6s ease;}
 @keyframes scorePop{0%{transform:scale(1);color:var(--gold3);}40%{transform:scale(1.35);color:var(--green3);}100%{transform:scale(1);}}
 .lb-score{display:inline-block;}
 .lb-rank-badge{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--txt);flex-shrink:0;transition:color .6s;}
-.lb-rank-badge.r1{background:var(--gold2);color:#0a1a0f!important;}
-.lb-rank-badge.r2{background:#909098;color:#fff!important;}
-.lb-rank-badge.r3{background:#c87040;color:#fff!important;}
+.lb-rank-badge.r1{background:linear-gradient(135deg,#ffd700,#e8b820);color:#0a1a0f!important;box-shadow:0 0 14px rgba(232,184,32,0.6);}
+.lb-rank-badge.r2{background:linear-gradient(135deg,#d8d8e0,#a0a0b0);color:#1a1a2a!important;box-shadow:0 0 12px rgba(180,180,200,0.4);}
+.lb-rank-badge.r3{background:linear-gradient(135deg,#e09050,#c87040);color:#fff!important;box-shadow:0 0 12px rgba(200,112,64,0.4);}
+.lb-row.top1{border-color:rgba(232,184,32,0.5);background:linear-gradient(90deg,rgba(232,184,32,0.10),transparent);}
+.lb-row.top2{border-color:rgba(180,180,200,0.35);background:linear-gradient(90deg,rgba(180,180,200,0.08),transparent);}
+.lb-row.top3{border-color:rgba(200,112,64,0.35);background:linear-gradient(90deg,rgba(200,112,64,0.08),transparent);}
+.lb-row.top1 .lb-score{color:#ffd700;}
+.lb-row.top1 .lb-name{color:var(--gold3);}
 .lb-name{flex:1;font-size:14px;font-weight:700;color:var(--txt);margin:0 12px;transition:color .6s;}
 .lb-score{font-size:18px;font-weight:900;color:var(--gold2);transition:color .6s;}
 
@@ -436,6 +441,7 @@ function lsG(k){return localStorage.getItem(k);}
 function lsS(k,v){localStorage.setItem(k,v);}
 function $(id){return document.getElementById(id);}
 function toAr(n){if(n>=1e6)return(n/1e6).toFixed(1)+"م";if(n>=1e3)return(n/1e3).toFixed(1)+"ك";return""+n;}
+function fullNum(n){return (n||0).toLocaleString("en-US");}
 function dKey(d){return d.toISOString().slice(0,10);}
 function wKey(d){const j=new Date(d.getFullYear(),0,1);return d.getFullYear()+"-W"+Math.ceil(((d-j)/86400000+j.getDay()+1)/7);}
 function mKey(d){return d.toISOString().slice(0,7);}
@@ -531,21 +537,21 @@ function renderUI(){
   const mt=mu.total||0,mtoday=(mu.today&&mu.today[today])||0,mweek=(mu.week&&mu.week[week])||0;
   const st=cacheStats;
   const tT=(st.today&&st.today[today])||0,wT=(st.week&&st.week[week])||0,moT=(st.month&&st.month[mKey(now)])||0,yT=(st.year&&st.year[yKey(now)])||0,gr=st.total||0;
-  const ut={};Object.values(cacheEntries).forEach(e=>{if(e&&e.user)ut[e.user]=(ut[e.user]||0)+1;});
-  const rank=Object.values(ut).filter(v=>v>mtoday).length+1;
-  $("ss-today").textContent=toAr(mtoday);$("ss-total").textContent=toAr(mt);$("ss-grand").textContent=toAr(gr);
+  const tk=today;const todayScores=Object.values(cacheUsers).map(u=>(u.today&&u.today[tk])||0);
+  const rank=todayScores.filter(v=>v>mtoday).length+1;
+  $("ss-today").textContent=toAr(mtoday);$("ss-total").textContent=toAr(mt);$("ss-grand").textContent=fullNum(gr);
   const pct=Math.min(100,Math.round(mtoday/goalVal*100));
   $("prog-fill").style.width=pct+"%";$("prog-txt").textContent=goalVal+" / "+mtoday;
   $("pb-total").textContent=toAr(mt);$("pb-rank").textContent="#"+rank;
   $("level-txt").textContent="المستوى: "+lvlName(mt);
   $("st-today").textContent=toAr(mtoday);$("st-week").textContent=toAr(mweek);$("st-total").textContent=toAr(mt);
-  $("sg-today").textContent=toAr(tT);$("sg-week").textContent=toAr(wT);$("sg-month").textContent=toAr(moT);$("sg-year").textContent=toAr(yT);$("sg-total").textContent=toAr(gr);
+  $("sg-today").textContent=toAr(tT);$("sg-week").textContent=toAr(wT);$("sg-month").textContent=toAr(moT);$("sg-year").textContent=toAr(yT);$("sg-total").textContent=fullNum(gr);
   renderLB();
 }
 
 function renderLB(){
   const now=new Date();let data=[];
-  if(lbTab==="today"){const ut={};Object.values(cacheEntries).forEach(e=>{if(e&&e.user)ut[e.user]=(ut[e.user]||0)+1;});data=Object.entries(ut).map(([n,s])=>({n,s}));}
+  if(lbTab==="today"){const tk=dKey(now);data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:(u.today&&u.today[tk])||0}));}
   else if(lbTab==="week"){const wk=wKey(now);data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:(u.week&&u.week[wk])||0}));}
   else{data=Object.entries(cacheUsers).map(([k,u])=>({n:u.name||k,s:u.total||0}));}
   data=data.filter(d=>d.s>0).sort((a,b)=>b.s-a.s).slice(0,50);
@@ -594,7 +600,8 @@ function renderLB(){
     const sc=row.querySelector(".lb-score");
     const scTxt=toAr(d.s);
     if(sc.textContent!==scTxt){sc.textContent=scTxt;sc.style.animation="none";void sc.offsetWidth;sc.style.animation="scorePop .4s ease";}
-    const cls="lb-row"+(isMe?" me3 pulse-active":"");
+    const topcls=i===0?" top1":i===1?" top2":i===2?" top3":"";
+    const cls="lb-row"+topcls+(isMe?" me3 pulse-active":"");
     if(row.className.replace(/\s*flipping/,"")!==cls)row.className=cls;
   });
 
