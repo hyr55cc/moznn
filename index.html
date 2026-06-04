@@ -522,8 +522,8 @@ function doIstighfar(ev){
 
 function lvlName(t){if(t>=10000)return"إمام";if(t>=5000)return"عابد";if(t>=1000)return"ذاكر";if(t>=300)return"مجتهد";if(t>=50)return"متقدم";return"مبتدئ";}
 
-let _renderRAF=null;
-function scheduleRender(){if(_renderRAF)return;_renderRAF=requestAnimationFrame(()=>{_renderRAF=null;renderUI();});}
+let _renderTimer=null;
+function scheduleRender(){clearTimeout(_renderTimer);_renderTimer=setTimeout(renderUI,60);}
 function renderUI(){
   if(!me)return;
   const now=new Date(),today=dKey(now),week=wKey(now),sm=safe(me);
