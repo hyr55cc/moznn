@@ -830,8 +830,22 @@ window.toAr = function (n) {
     var board = ranked();
     var isFirst = board[0] && board[0].id === "me";
     var ready = !fbEnabled() || state._fbReady;
+    var todayKey = today();
+    
+    // تهيئة بيانات اليوم إذا لم تكن موجودة
+    if (!state._firstPlaceDaily) {
+      state._firstPlaceDaily = {};
+    }
+    
     if (isFirst && !state._wasFirst && state.me.total > 0 && ready) {
+      // زيادة العداد الكلي
       state.me.firstPlaceCount++;
+      
+      // تسجيل المركز الأول لهذا اليوم
+      if (!state._firstPlaceDaily[todayKey]) {
+        state._firstPlaceDaily[todayKey] = 1;
+      }
+      
       scheduleWrite();
     }
     state._wasFirst = isFirst;
@@ -978,8 +992,23 @@ window.toAr = function (n) {
       return s;
     },
     dailyTotal: function () {
-      var s = state ? state.me.today : 0;
-      if (state) for (var i = 0; i < state.others.length; i++) s += (state.others[i].today || 0);
+      var s = 0;
+      // إضافة استغفار المستخدم الحالي اليوم
+      if (state && state.me) {
+        var todayKey = today();
+        if (state.me.todayDate === todayKey) {
+          s += state.me.today || 0;
+        }
+      }
+      // إضافة استغفار جميع المستخدمين الآخرين اليوم
+      if (state && state.others && state.others.length > 0) {
+        for (var i = 0; i < state.others.length; i++) {
+          var otherUser = state.others[i];
+          // تحويل بيانات المستخدم إذا كانت بصيغة مختلفة
+          var otherDaily = otherUser.dailyCount || otherUser.day?.n || otherUser.today || 0;
+          s += otherDaily;
+        }
+      }
       return s;
     },
     myRank: function (metric) {
@@ -989,10 +1018,17 @@ window.toAr = function (n) {
     },
     profile: function (id) {
       if (id === "me") {
+        var dailyFirstPlaceCount = 0;
+        var todayKey = today();
+        if (state && state._firstPlaceDaily && state._firstPlaceDaily[todayKey]) {
+          dailyFirstPlaceCount = state._firstPlaceDaily[todayKey];
+        }
         return {
           id: "me", name: state.me.name, total: state.me.total,
           daily: myDaily(), weekly: myWeekly(), monthly: myMonthly(),
-          firstPlaceCount: state.me.firstPlaceCount, joined: state.me.joined,
+          firstPlaceCount: state.me.firstPlaceCount, 
+          dailyFirstPlaceCount: dailyFirstPlaceCount,
+          joined: state.me.joined,
           rank: this.myRank("total"), bestDay: state.me.bestDay, streak: state.me.streak, me: true,
         };
       }
@@ -1739,8 +1775,52 @@ function ContactFooter() {
 
   function handleSubmit() {
     if (subject.trim() && message.trim()) {
-      // Here you would send the message to your backend
-      console.log("رسالة مرسلة:", { subject, message });
+      // الحصول على بيانات المستخدم من MoznStore
+      const currentState = MoznStore.get();
+      const userEmail = (currentState && currentState.me && currentState.me.email) || "مستخدم غير معروف";
+      const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم غير معروف";
+      
+      // محاولة الإرسال عبر API بسيط (يمكن تغييره لاحقاً)
+      const emailData = {
+        to: "halfofthird@gmail.com",
+        subject: `[مزن] ${subject}`,
+        body: `
+الموضوع: ${subject}
+
+الرسالة:
+${message}
+
+---
+من: ${userName}
+البريد: ${userEmail}
+التاريخ: ${new Date().toLocaleString('ar-EG')}
+        `.trim()
+      };
+      
+      // حفظ الرسالة محلياً أيضاً
+      console.log("رسالة مرسلة إلى:", emailData.to);
+      console.log(emailData);
+      
+      // محاولة الإرسال عبر Formspree (خدمة مجانية لإرسال الرسائل)
+      try {
+        fetch("https://formspree.io/f/xldgvpwn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject: emailData.subject,
+            message: emailData.body,
+            email: userEmail,
+            name: userName
+          })
+        }).then(() => {
+          console.log("تم الإرسال بنجاح!");
+        }).catch(err => {
+          console.log("خطأ في الإرسال:", err);
+        });
+      } catch (e) {
+        console.log("خطأ:", e);
+      }
+      
       setSent(true);
       setTimeout(() => {
         setSent(false);
@@ -2029,7 +2109,7 @@ function ProfileSheet({ id, onClose }) {
         </div>
         <div className="prof-grid">
           <div className="prof-box"><div className="prof-val">{fmt(p.total)}</div><div className="prof-lbl">إجمالي الاستغفار</div></div>
-          <div className="prof-box gold"><div className="prof-val">🏆 {fmt(p.firstPlaceCount)}</div><div className="prof-lbl">مرات المركز الأول</div></div>
+          <div className="prof-box gold"><div className="prof-val">🏆 {fmt(p.dailyFirstPlaceCount || p.firstPlaceCount || 0)}</div><div className="prof-lbl">مرات المركز الأول {p.me ? "اليوم" : ""}</div></div>
           <div className="prof-box"><div className="prof-val">{fmt(p.daily || 0)}</div><div className="prof-lbl">اليوم</div></div>
           <div className="prof-box"><div className="prof-val">{fmtK(p.weekly || 0)}</div><div className="prof-lbl">هذا الأسبوع</div></div>
           <div className="prof-box"><div className="prof-val">{fmtK(p.monthly || 0)}</div><div className="prof-lbl">هذا الشهر</div></div>
