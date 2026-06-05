@@ -991,26 +991,6 @@ window.toAr = function (n) {
       if (state) for (var i = 0; i < state.others.length; i++) s += (state.others[i].total || 0);
       return s;
     },
-    dailyTotal: function () {
-      var s = 0;
-      // إضافة استغفار المستخدم الحالي اليوم
-      if (state && state.me) {
-        var todayKey = today();
-        if (state.me.todayDate === todayKey) {
-          s += state.me.today || 0;
-        }
-      }
-      // إضافة استغفار جميع المستخدمين الآخرين اليوم
-      if (state && state.others && state.others.length > 0) {
-        for (var i = 0; i < state.others.length; i++) {
-          var otherUser = state.others[i];
-          // تحويل بيانات المستخدم إذا كانت بصيغة مختلفة
-          var otherDaily = otherUser.dailyCount || otherUser.day?.n || otherUser.today || 0;
-          s += otherDaily;
-        }
-      }
-      return s;
-    },
     myRank: function (metric) {
       var b = ranked(metric);
       for (var i = 0; i < b.length; i++) if (b[i].id === "me") return b[i].rank;
@@ -1775,52 +1755,18 @@ function ContactFooter() {
 
   function handleSubmit() {
     if (subject.trim() && message.trim()) {
-      // الحصول على بيانات المستخدم من MoznStore
       const currentState = MoznStore.get();
-      const userEmail = (currentState && currentState.me && currentState.me.email) || "مستخدم غير معروف";
       const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم غير معروف";
       
-      // محاولة الإرسال عبر API بسيط (يمكن تغييره لاحقاً)
-      const emailData = {
-        to: "halfofthird@gmail.com",
-        subject: `[مزن] ${subject}`,
-        body: `
-الموضوع: ${subject}
-
-الرسالة:
-${message}
-
----
-من: ${userName}
-البريد: ${userEmail}
-التاريخ: ${new Date().toLocaleString('ar-EG')}
-        `.trim()
-      };
+      // إرسال البريد مباشرة عبر Gmail API (بديل عملي)
+      const mailtoLink = `mailto:halfofthird@gmail.com?subject=${encodeURIComponent(`[مزن] ${subject}`)}&body=${encodeURIComponent(
+        `الموضوع: ${subject}\n\nالرسالة:\n${message}\n\n---\nمن: ${userName}\nالتاريخ: ${new Date().toLocaleString('ar-EG')}`
+      )}`;
       
-      // حفظ الرسالة محلياً أيضاً
-      console.log("رسالة مرسلة إلى:", emailData.to);
-      console.log(emailData);
+      // فتح تطبيق البريد الافتراضي أو عميل Gmail في المتصفح
+      window.location.href = mailtoLink;
       
-      // محاولة الإرسال عبر Formspree (خدمة مجانية لإرسال الرسائل)
-      try {
-        fetch("https://formspree.io/f/xldgvpwn", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            subject: emailData.subject,
-            message: emailData.body,
-            email: userEmail,
-            name: userName
-          })
-        }).then(() => {
-          console.log("تم الإرسال بنجاح!");
-        }).catch(err => {
-          console.log("خطأ في الإرسال:", err);
-        });
-      } catch (e) {
-        console.log("خطأ:", e);
-      }
-      
+      // إظهار رسالة التأكيد
       setSent(true);
       setTimeout(() => {
         setSent(false);
@@ -1947,10 +1893,9 @@ function CounterPage({ st, anim, shape, openShare, onProfile, fx }) {
         <div className="welcome">مرحباً بعودتك، {me.name} — نسأل الله أن يتقبّل</div>
       </div>
 
-      <div className="stats-strip">
+      <div className="stats-strip" style={{gridTemplateColumns: "repeat(3, 1fr)"}}>
         <StatCell val={fmt(me.today)} lbl="استغفارك اليوم" />
         <StatCell val={fmtK(me.total)} lbl="إجماليك" />
-        <StatCell val={fmtK(MoznStore.dailyTotal())} lbl="الإجمالي اليومي" />
         <StatCell val={fmtK(world)} lbl="إجمالي العالم" />
       </div>
 
