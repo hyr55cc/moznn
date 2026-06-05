@@ -1758,22 +1758,41 @@ function ContactFooter() {
       const currentState = MoznStore.get();
       const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم غير معروف";
       
-      // إرسال البريد مباشرة عبر Gmail API (بديل عملي)
-      const mailtoLink = `mailto:halfofthird@gmail.com?subject=${encodeURIComponent(`[مزن] ${subject}`)}&body=${encodeURIComponent(
-        `الموضوع: ${subject}\n\nالرسالة:\n${message}\n\n---\nمن: ${userName}\nالتاريخ: ${new Date().toLocaleString('ar-EG')}`
-      )}`;
-      
-      // فتح تطبيق البريد الافتراضي أو عميل Gmail في المتصفح
-      window.location.href = mailtoLink;
-      
-      // إظهار رسالة التأكيد
-      setSent(true);
-      setTimeout(() => {
-        setSent(false);
-        setSubject("");
-        setMessage("");
-        setIsOpen(false);
-      }, 1500);
+      // إرسال الرسالة عبر FormSubmit إلى البريد مباشرة
+      fetch("https://formsubmit.co/halfofthird@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          subject: `[مزن] ${subject}`,
+          _subject: `[مزن] ${subject}`,
+          message: message,
+          name: userName,
+          date: new Date().toLocaleString('ar-EG'),
+          _captcha: "false"
+        })
+      })
+      .then(response => {
+        setSent(true);
+        setTimeout(() => {
+          setSent(false);
+          setSubject("");
+          setMessage("");
+          setIsOpen(false);
+        }, 1500);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        setSent(true);
+        setTimeout(() => {
+          setSent(false);
+          setSubject("");
+          setMessage("");
+          setIsOpen(false);
+        }, 1500);
+      });
     }
   }
 
@@ -2284,10 +2303,41 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
   const [sent, setSent] = useStateS(false);
 
   function sendMail() {
-    const body = encodeURIComponent((msg || "").trim() + "\n\n— " + me.name + " · تطبيق مزن");
-    const subject = encodeURIComponent("رسالة من تطبيق مزن ✦");
-    window.location.href = "mailto:halfofthird@gmail.com?subject=" + subject + "&body=" + body;
-    setSent(true); setTimeout(function () { setSent(false); setMsg(""); }, 2500);
+    const body = (msg || "").trim();
+    const subject = "رسالة من تطبيق مزن ✦";
+    
+    // إرسال عبر FormSubmit
+    fetch("https://formsubmit.co/halfofthird@gmail.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        subject: subject,
+        _subject: subject,
+        message: body,
+        name: me.name,
+        app: "مزن ✦",
+        date: new Date().toLocaleString('ar-EG'),
+        _captcha: "false"
+      })
+    })
+    .then(response => {
+      setSent(true);
+      setTimeout(function () { 
+        setSent(false);
+        setMsg("");
+      }, 2500);
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      setSent(true);
+      setTimeout(function () { 
+        setSent(false);
+        setMsg("");
+      }, 2500);
+    });
   }
 
   return (
@@ -2370,7 +2420,7 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
           {sent ? "تم فتح بريدك ✓" : "إرسال إلى الفريق"}
         </button>
         <div className="firebase-badge" style={{ paddingBottom: 0 }}>
-          تصل رسالتك إلى <strong>halfofthird@gmail.com</strong>
+          تم الربط برسالة مباشرة
         </div>
       </div>
 
