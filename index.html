@@ -1087,6 +1087,40 @@ window.toAr = function (n) {
       }
       return out;
     },
+    
+    // hijri month data
+    hijriMonthData: function () {
+      var out = [];
+      var h = getHijriDate();
+      var hijriMonths = ["محرم", "صفر", "ربيع الأول", "ربيع الثاني", "جمادى الأولى", "جمادى الثانية", 
+                         "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"];
+      var monthLabel = hijriMonths[h.month - 1] + " " + h.year + "ه";
+      
+      // حساب أول يوم في الشهر الهجري الحالي
+      var today_d = new Date();
+      var startOfMonth = new Date(today_d);
+      
+      // الحصول على بيانات آخر 30 يوم وحساب الشهر الهجري لكل يوم
+      for (var i = 29; i >= 0; i--) {
+        var d = new Date(); 
+        d.setDate(d.getDate() - i);
+        var key = d.toISOString().slice(0, 10);
+        var h_day = getHijriDate(d);
+        var count = key === state.me.todayDate ? state.me.today : (state.me.history[key] || 0);
+        
+        // فقط أضف الأيام من الشهر الهجري الحالي
+        if (h_day.month === h.month && h_day.year === h.year) {
+          out.push({ 
+            date: key, 
+            label: h_day.day, 
+            count: count, 
+            isToday: i === 0 
+          });
+        }
+      }
+      
+      return { label: monthLabel, data: out };
+    },
 
     // ---- "live world": other worshippers tick up over time -------------
     _liveTimer: null,
@@ -1983,11 +2017,9 @@ function CounterPage({ st, anim, shape, openShare, onProfile, fx }) {
 
       <div className="btn-wrap">
         <div className="name-level">
-          <div className="name-txt">{lvl.name}</div>
+          <div className="name-txt">{me.countryFlag} {me.name}</div>
           <div className="level-txt">
-            {lvl.nextName
-              ? "تبقّى " + fmt(Math.max(0, lvl.ceil - me.total)) + " لرتبة " + lvl.nextName
-              : "أعلى رتبة ما شاء الله"}
+            المركز #{MoznStore.myRank("total")} عالمياً
           </div>
         </div>
 
@@ -2292,9 +2324,10 @@ function LeaderboardPage({ st, onProfile }) {
 function StatsPage({ st }) {
   const me = st.me;
   const week = MoznStore.weekly();
+  const hijri = MoznStore.hijriMonthData();
   const lvl = moznLevel(me.total);
   const myRank = MoznStore.myRank();
-  const max = Math.max(1, ...week.map(function (d) { return d.count; }));
+  const max = Math.max(1, ...hijri.data.map(function (d) { return d.count; }));
   const lvlPct = lvl.ceil ? Math.min(100, Math.round(((me.total - lvl.floor) / (lvl.ceil - lvl.floor)) * 100)) : 100;
 
   return (
@@ -2312,9 +2345,9 @@ function StatsPage({ st }) {
       </div>
 
       <div className="scard">
-        <div className="scard-title">آخر ٧ أيام</div>
+        <div className="scard-title">{hijri.label}</div>
         <div className="wk-chart">
-          {week.map(function (d, i) {
+          {hijri.data.map(function (d, i) {
             return (
               <div key={i} className="wk-col">
                 <div className="wk-bar-track">
@@ -2322,7 +2355,7 @@ function StatsPage({ st }) {
                     {d.count > 0 && <span className="wk-val">{fmtK(d.count)}</span>}
                   </div>
                 </div>
-                <div className={"wk-lbl" + (d.isToday ? " today" : "")}>{d.label.slice(0, 3)}</div>
+                <div className={"wk-lbl" + (d.isToday ? " today" : "")}>{d.label}</div>
               </div>
             );
           })}
