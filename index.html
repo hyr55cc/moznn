@@ -1093,12 +1093,13 @@ window.toAr = function (n) {
           dailyFirstPlaceCount: dailyFirstPlaceCount,
           joined: state.me.joined,
           rank: this.myRank("total"), bestDay: state.me.bestDay, streak: state.me.streak, me: true,
+          countryFlag: state.me.countryFlag || "🇸🇦",
         };
       }
       var u = state.others.filter(function (x) { return x.id === id; })[0];
       if (!u) return null;
       var found = ranked("total").filter(function (x) { return x.id === id; })[0];
-      return Object.assign({}, u, { rank: found ? found.rank : null });
+      return Object.assign({ countryFlag: "🇸🇦" }, u, { rank: found ? found.rank : null });
     },
 
     // weekly history -> last 7 days [{date,label,count}]
@@ -2187,7 +2188,7 @@ function ProfileSheet({ id, onClose }) {
         <div className="prof-head">
           <div className={"prof-av" + (p.rank === 1 ? " r1" : "")}>{avatarOf(p.name)}</div>
           <div className="prof-id">
-            <div className="prof-name">{p.name}{p.me ? " (أنت)" : ""}</div>
+            <div className="prof-name">{p.countryFlag || "🇸🇦"} {p.name}{p.me ? " (أنت)" : ""}</div>
             <div className="prof-lvl">{lvl.name} · المركز #{p.rank} عالمياً</div>
           </div>
         </div>
@@ -2395,10 +2396,11 @@ function LeaderboardPage({ st, onProfile }) {
 
         {board.map(function (u) {
           const cls = "lb-rank-badge" + (u.rank === 1 ? " r1" : u.rank === 2 ? " r2" : u.rank === 3 ? " r3" : "");
+          const flag = u.countryFlag || "🇸🇦";
           return (
             <div key={u.id} className={"lb-row" + (u.me ? " me3" : "")} onClick={function () { onProfile(u.id); }} style={{ cursor: "pointer" }}>
               <div className={cls}>{u.rank <= 3 ? ["🥇", "🥈", "🥉"][u.rank - 1] : u.rank}</div>
-              <div className="lb-name">{u.name}{u.me ? " · أنت" : ""}{u.firstPlaceCount > 0 ? <span className="lb-crowns"> 🏆{u.firstPlaceCount}</span> : null}</div>
+              <div className="lb-name">{flag} {u.name}{u.me ? " · أنت" : ""}{u.firstPlaceCount > 0 ? <span className="lb-crowns"> 🏆{u.firstPlaceCount}</span> : null}</div>
               <div className="lb-score">{fmtK(u[tab])}</div>
             </div>
           );
