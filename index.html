@@ -726,6 +726,31 @@ window.toAr = function (n) {
   ];
 
   // ---- period ids (for daily/weekly/monthly boards) ---------------------
+  
+  // دالة تحويل التاريخ الميلادي إلى هجري
+  function getHijriDate(d) {
+    d = d || new Date();
+    var jd = Math.floor((d / 86400000) - (d.getTimezoneOffset() / 1440) + 2440587.5);
+    var l = jd + 68569;
+    var n = Math.floor((4 * l) / 146097);
+    l = l - Math.floor((146097 * n + 3) / 4);
+    var i = Math.floor((4000 * (l + 1)) / 1461001);
+    l = l - Math.floor((1461 * i) / 4) + 31;
+    var j = Math.floor((80 * l) / 2447);
+    var day = l - Math.floor((2447 * j) / 80);
+    l = Math.floor(j / 11);
+    var month = j + 2 - (12 * l);
+    var year = (100 * (n - 49)) + i + l;
+    return { year: Math.floor(year), month: Math.floor(month), day: Math.floor(day) };
+  }
+  
+  // دالة التقويم الهجري (YYYY-HM للشهر الهجري)
+  function hijriMonthId(d) {
+    d = d || new Date();
+    var h = getHijriDate(d);
+    return h.year + "-HM" + (h.month < 10 ? "0" : "") + h.month;
+  }
+  
   function monthId(d) { d = d || new Date(); return d.toISOString().slice(0, 7); }
   function weekId(d) {
     d = d || new Date();
@@ -757,6 +782,7 @@ window.toAr = function (n) {
         streak: 0, lastDay: null, firstPlaceCount: 0, bestDay: 0,
         goal: 100, joined: today(), history: {},
         weekId: weekId(), weekN: 0, monthId: monthId(), monthN: 0,
+        countryFlag: "🇸🇦", // علم الدولة الافتراضي
       },
       others: [],
       settings: { themeId: 2, mode: "night", sound: true, haptic: true, sabhaPhase: 0, sabhaCount: 0, sabhaDhikr: 0 },
@@ -810,12 +836,14 @@ window.toAr = function (n) {
       id: "me", name: state.me.name, total: state.me.total,
       daily: myDaily(), weekly: myWeekly(), monthly: myMonthly(),
       firstPlaceCount: state.me.firstPlaceCount, joined: state.me.joined, me: true,
+      countryFlag: state.me.countryFlag || "🇸🇦",
     };
     var others = state.others.map(function (u) {
       return {
         id: u.id, name: u.name, total: u.total || 0,
         daily: u.daily || 0, weekly: u.weekly || 0, monthly: u.monthly || 0,
         firstPlaceCount: u.firstPlaceCount || 0, joined: u.joined || "",
+        countryFlag: u.countryFlag || "🇸🇦",
       };
     });
     var all = [me].concat(others);
@@ -974,9 +1002,38 @@ window.toAr = function (n) {
 
     setGoal: function (g) { state.me.goal = Math.max(1, g | 0); persist(); notify(); },
     setSetting: function (k, v) { state.settings[k] = v; persist(); notify(); },
+    setCountryFlag: function (flag) { state.me.countryFlag = flag; persist(); notify(); },
     setSabha: function (count, phase) {
       state.settings.sabhaCount = count;
       state.settings.sabhaPhase = phase;
+      
+      // إذا انتهى من السبحة، إضافة العدد للاستغفار اليومي
+      if (count === 0 && state.settings.sabhaCount !== undefined && state.settings.sabhaCount > 0) {
+        var sabhaCompleted = state.settings.sabhaCount || 0;
+        if (sabhaCompleted > 0) {
+          // إضافة عدد السبحة للاستغفار اليومي والإجمالي
+          state.me.today += sabhaCompleted;
+          state.me.total += sabhaCompleted;
+          
+          // تحديث الأسبوعي والشهري
+          var wid = weekId(); 
+          if (state.me.weekId !== wid) { 
+            state.me.weekId = wid; 
+            state.me.weekN = sabhaCompleted; 
+          } else { 
+            state.me.weekN = (state.me.weekN || 0) + sabhaCompleted; 
+          }
+          
+          var mid = monthId(); 
+          if (state.me.monthId !== mid) { 
+            state.me.monthId = mid; 
+            state.me.monthN = sabhaCompleted; 
+          } else { 
+            state.me.monthN = (state.me.monthN || 0) + sabhaCompleted; 
+          }
+        }
+      }
+      
       persist(); notify();
     },
     setSabhaDhikr: function (i) {
@@ -1734,10 +1791,11 @@ function LeaderboardInline({ st, onProfile }) {
       </div>
       {board.map(function (u) {
         const cls = "lb-rank-badge" + (u.rank === 1 ? " r1" : u.rank === 2 ? " r2" : u.rank === 3 ? " r3" : "");
+        const flag = u.countryFlag || "🇸🇦"; // علم الدولة أو الافتراضي
         return (
           <div key={u.id} className={"lb-row" + (u.me ? " me3" : "")} onClick={function () { onProfile(u.id); }} style={{ cursor: "pointer" }}>
             <div className={cls}>{u.rank <= 3 ? ["🥇", "🥈", "🥉"][u.rank - 1] : u.rank}</div>
-            <div className="lb-name">{u.name}{u.me ? " · أنت" : ""}{u.firstPlaceCount > 0 ? <span className="lb-crowns"> 🏆{u.firstPlaceCount}</span> : null}</div>
+            <div className="lb-name">{flag} {u.name}{u.me ? " · أنت" : ""}{u.firstPlaceCount > 0 ? <span className="lb-crowns"> 🏆{u.firstPlaceCount}</span> : null}</div>
             <div className="lb-score">{fmtK(u[tab])}</div>
           </div>
         );
@@ -2068,7 +2126,7 @@ function ProfileSheet({ id, onClose }) {
           <div className={"prof-av" + (p.rank === 1 ? " r1" : "")}>{avatarOf(p.name)}</div>
           <div className="prof-id">
             <div className="prof-name">{p.name}{p.me ? " (أنت)" : ""}</div>
-            <div className="prof-lvl">{lvl.name} · المركز #{p.rank}</div>
+            <div className="prof-lvl">{lvl.name} · المركز #{p.rank} عالمياً</div>
           </div>
         </div>
         <div className="prof-grid">
@@ -2351,6 +2409,55 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
             <div className="prof-lvl">{lvl.name} · {fmt(me.total)} استغفار · 🏆 {fmt(me.firstPlaceCount)}</div>
           </div>
         </div>
+      </div>
+
+      <div className="cfg-card">
+        <div className="cfg-title">🌍 الدولة</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "10px" }}>
+          {["🇸🇦", "🇦🇪", "🇪🇬", "🇵🇸", "🇴🇲", "🇶🇦", "🇰🇼", "🇧🇭", "🇮🇶", "🇯🇴", "🇱🇧", "🇲🇦"].map(flag => (
+            <button 
+              key={flag}
+              onClick={() => { 
+                MoznStore.setCountryFlag(flag);
+              }}
+              style={{
+                padding: "12px",
+                fontSize: "20px",
+                border: s.countryFlag === flag ? "2px solid var(--green)" : "1px solid var(--bdr)",
+                borderRadius: "10px",
+                background: "var(--card2)",
+                cursor: "pointer",
+                transition: "all .2s"
+              }}
+            >
+              {flag}
+            </button>
+          ))}
+        </div>
+        <input 
+          type="text"
+          placeholder="أو أضف علم مخصص (آخر رمز/علم)"
+          maxLength="2"
+          style={{
+            width: "100%",
+            padding: "10px",
+            border: "1px solid var(--bdr)",
+            borderRadius: "8px",
+            background: "var(--card)",
+            color: "var(--txt)",
+            fontSize: "14px",
+            marginTop: "10px"
+          }}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              const flag = e.target.value.trim();
+              if (flag) {
+                MoznStore.setCountryFlag(flag);
+                e.target.value = "";
+              }
+            }
+          }}
+        />
       </div>
 
       <div className="cfg-card">
