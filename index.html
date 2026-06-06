@@ -730,18 +730,35 @@ window.toAr = function (n) {
   // دالة تحويل التاريخ الميلادي إلى هجري
   function getHijriDate(d) {
     d = d || new Date();
-    var jd = Math.floor((d / 86400000) - (d.getTimezoneOffset() / 1440) + 2440587.5);
-    var l = jd + 68569;
-    var n = Math.floor((4 * l) / 146097);
-    l = l - Math.floor((146097 * n + 3) / 4);
-    var i = Math.floor((4000 * (l + 1)) / 1461001);
-    l = l - Math.floor((1461 * i) / 4) + 31;
-    var j = Math.floor((80 * l) / 2447);
-    var day = l - Math.floor((2447 * j) / 80);
-    l = Math.floor(j / 11);
-    var month = j + 2 - (12 * l);
-    var year = (100 * (n - 49)) + i + l;
-    return { year: Math.floor(year), month: Math.floor(month), day: Math.floor(day) };
+    
+    var a = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var j = d.getDate();
+    
+    // حساب Julian Day Number
+    var jd = Math.floor((1461 * (a + 4800 + Math.floor((m - 14) / 12))) / 4) + 
+             Math.floor((367 * (m - 2 - 12 * (Math.floor((m - 14) / 12)))) / 12) - 
+             Math.floor((3 * (Math.floor((a + 4900 + Math.floor((m - 14) / 12)) / 100))) / 4) + 
+             j - 32045;
+    
+    // تحويل إلى تاريخ هجري
+    var n = jd - 1948440 + 385;
+    var q = Math.floor(n / 10631);
+    n = n % 10631;
+    var r = Math.floor(n / 325);
+    n = n % 325;
+    var t = Math.floor((3 * n + 5) / 99);
+    n = n - Math.floor((99 * t + 3) / 5);
+    
+    var hijriYear = 30 * q + 30 * r + t + 1;
+    var hijriMonth = Math.floor((5 * n + 2) / 153) + 1;
+    var hijriDay = (n % 153) + 1;
+    
+    return { 
+      year: hijriYear, 
+      month: hijriMonth, 
+      day: hijriDay 
+    };
   }
   
   // دالة التقويم الهجري (YYYY-HM للشهر الهجري)
@@ -1850,23 +1867,21 @@ function ContactFooter() {
       const currentState = MoznStore.get();
       const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم غير معروف";
       
-      // إرسال الرسالة عبر FormSubmit إلى البريد مباشرة
+      // استخدام FormData للإرسال الصحيح
+      const form = new FormData();
+      form.append("email", "halfofthird@gmail.com");
+      form.append("subject", `[مزن] ${subject}`);
+      form.append("message", `الموضوع: ${subject}\n\nالرسالة:\n${message}`);
+      form.append("name", userName);
+      form.append("date", new Date().toLocaleString('ar-EG'));
+      form.append("_captcha", "false");
+      
       fetch("https://formsubmit.co/halfofthird@gmail.com", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          subject: `[مزن] ${subject}`,
-          _subject: `[مزن] ${subject}`,
-          message: message,
-          name: userName,
-          date: new Date().toLocaleString('ar-EG'),
-          _captcha: "false"
-        })
+        body: form
       })
       .then(response => {
+        console.log("✓ تم الإرسال");
         setSent(true);
         setTimeout(() => {
           setSent(false);
@@ -1876,7 +1891,7 @@ function ContactFooter() {
         }, 1500);
       })
       .catch(error => {
-        console.error("Error:", error);
+        console.error("خطأ:", error);
         setSent(true);
         setTimeout(() => {
           setSent(false);
@@ -2071,6 +2086,10 @@ function SabhaPage({ st, fx }) {
     const s = MoznStore.get().settings;
     const d = MOZN_ADHKAR[s.sabhaDhikr || 0];
     const next = (s.sabhaCount || 0) + 1;
+    
+    // ✓ إضافة +1 للاستغفار تلقائياً عند كل ضغطة
+    MoznStore.increment(1);
+    
     if (next >= d.target) {
       fx.milestone();
       MoznStore.setSabha(0, s.sabhaPhase || 0);
@@ -2172,6 +2191,66 @@ function ProfileSheet({ id, onClose }) {
             : <div className="prof-box"><div className="prof-val" style={{ fontSize: 15 }}>{joined}</div><div className="prof-lbl">عضو منذ</div></div>}
         </div>
         <div className="prof-since">عضو منذ {joined}</div>
+        
+        {p.me && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginTop: "12px", marginBottom: "12px" }}>
+            <button 
+              style={{
+                padding: "10px",
+                border: "1px solid var(--bdr)",
+                borderRadius: "8px",
+                background: "var(--card2)",
+                color: "var(--txt)",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: "700"
+              }}
+              onClick={() => {
+                const text = `أستغفر الله! وصلت ${fmt(p.total)} استغفار في مزن ✦ #استغفار`;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+              }}
+            >
+              𝕏 تويتر
+            </button>
+            <button 
+              style={{
+                padding: "10px",
+                border: "1px solid var(--bdr)",
+                borderRadius: "8px",
+                background: "var(--card2)",
+                color: "var(--txt)",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: "700"
+              }}
+              onClick={() => {
+                const text = `أستغفر الله! وصلت ${fmt(p.total)} استغفار في مزن ✦ #استغفار`;
+                alert("انسخ: " + text);
+              }}
+            >
+              📷 إنستغرام
+            </button>
+            <button 
+              style={{
+                padding: "10px",
+                border: "1px solid var(--bdr)",
+                borderRadius: "8px",
+                background: "var(--card2)",
+                color: "var(--txt)",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: "700"
+              }}
+              onClick={() => {
+                const text = `أستغفر الله! وصلت ${fmt(p.total)} استغفار في مزن ✦ #استغفار`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+              }}
+            >
+              💚 واتس
+            </button>
+          </div>
+        )}
+        
         <button className="login-btn" style={{ marginTop: 4 }} onClick={onClose}>إغلاق</button>
       </div>
     </div>
@@ -2397,22 +2476,19 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
     const body = (msg || "").trim();
     const subject = "رسالة من تطبيق مزن ✦";
     
-    // إرسال عبر FormSubmit
+    // استخدام FormData للإرسال الصحيح
+    const form = new FormData();
+    form.append("email", "halfofthird@gmail.com");
+    form.append("subject", subject);
+    form.append("message", body);
+    form.append("name", me.name);
+    form.append("app", "مزن ✦");
+    form.append("date", new Date().toLocaleString('ar-EG'));
+    form.append("_captcha", "false");
+    
     fetch("https://formsubmit.co/halfofthird@gmail.com", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        subject: subject,
-        _subject: subject,
-        message: body,
-        name: me.name,
-        app: "مزن ✦",
-        date: new Date().toLocaleString('ar-EG'),
-        _captcha: "false"
-      })
+      body: form
     })
     .then(response => {
       setSent(true);
@@ -2422,7 +2498,7 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
       }, 2500);
     })
     .catch(error => {
-      console.error("Error:", error);
+      console.error("خطأ:", error);
       setSent(true);
       setTimeout(function () { 
         setSent(false);
@@ -2467,30 +2543,6 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
             </button>
           ))}
         </div>
-        <input 
-          type="text"
-          placeholder="أو أضف علم مخصص (آخر رمز/علم)"
-          maxLength="2"
-          style={{
-            width: "100%",
-            padding: "10px",
-            border: "1px solid var(--bdr)",
-            borderRadius: "8px",
-            background: "var(--card)",
-            color: "var(--txt)",
-            fontSize: "14px",
-            marginTop: "10px"
-          }}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
-              const flag = e.target.value.trim();
-              if (flag) {
-                MoznStore.setCountryFlag(flag);
-                e.target.value = "";
-              }
-            }
-          }}
-        />
       </div>
 
       <div className="cfg-card">
