@@ -1873,46 +1873,48 @@ function ContactFooter() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(false);
 
   function handleSubmit() {
-    if (subject.trim() && message.trim()) {
-      const currentState = MoznStore.get();
-      const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم غير معروف";
-      
-      // استخدام FormData للإرسال الصحيح
-      const form = new FormData();
-      form.append("email", "halfofthird@gmail.com");
-      form.append("subject", `[مزن] ${subject}`);
-      form.append("message", `الموضوع: ${subject}\n\nالرسالة:\n${message}`);
-      form.append("name", userName);
-      form.append("date", new Date().toLocaleString('ar-EG'));
-      form.append("_captcha", "false");
-      
-      fetch("https://formsubmit.co/halfofthird@gmail.com", {
-        method: "POST",
-        body: form
+    if (!subject.trim() || !message.trim()) return;
+    
+    const currentState = MoznStore.get();
+    const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم";
+    setSending(true);
+    setError(false);
+
+    // FormSubmit - الطريقة الصحيحة عبر JSON
+    fetch("https://formsubmit.co/ajax/halfofthird@gmail.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        _subject: `[مزن] ${subject}`,
+        name: userName,
+        message: `الموضوع: ${subject}\n\nالرسالة:\n${message}\n\n— من: ${userName} | التاريخ: ${new Date().toLocaleString('ar-SA')}`,
+        _captcha: "false",
+        _template: "table"
       })
-      .then(response => {
-        console.log("✓ تم الإرسال");
+    })
+    .then(res => res.json())
+    .then(data => {
+      setSending(false);
+      if (data.success === "true" || data.success === true) {
         setSent(true);
         setTimeout(() => {
-          setSent(false);
-          setSubject("");
-          setMessage("");
-          setIsOpen(false);
-        }, 1500);
-      })
-      .catch(error => {
-        console.error("خطأ:", error);
-        setSent(true);
-        setTimeout(() => {
-          setSent(false);
-          setSubject("");
-          setMessage("");
-          setIsOpen(false);
-        }, 1500);
-      });
-    }
+          setSent(false); setSubject(""); setMessage(""); setIsOpen(false);
+        }, 2000);
+      } else {
+        setError(true);
+      }
+    })
+    .catch(() => {
+      setSending(false);
+      setError(true);
+    });
   }
 
   return (
@@ -2274,27 +2276,41 @@ function ContactFooter() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState(false);
 
   function handleSubmit() {
-    if (subject.trim() && message.trim()) {
-      console.log("رسالة مرسلة:", { subject, message });
-      setSent(true);
-      setTimeout(() => {
-        setSent(false);
-        setSubject("");
-        setMessage("");
-        setIsOpen(false);
-      }, 1500);
-    }
+    if (!subject.trim() || !message.trim()) return;
+    const currentState = MoznStore.get();
+    const userName = (currentState && currentState.me && currentState.me.name) || "مستخدم";
+    setSending(true);
+    setError(false);
+    fetch("https://formsubmit.co/ajax/halfofthird@gmail.com", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: `[مزن] ${subject}`,
+        name: userName,
+        message: `الموضوع: ${subject}\n\nالرسالة:\n${message}\n\n— من: ${userName} | التاريخ: ${new Date().toLocaleString('ar-SA')}`,
+        _captcha: "false",
+        _template: "table"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setSending(false);
+      if (data.success === "true" || data.success === true) {
+        setSent(true);
+        setTimeout(() => { setSent(false); setSubject(""); setMessage(""); setIsOpen(false); }, 2000);
+      } else { setError(true); }
+    })
+    .catch(() => { setSending(false); setError(true); });
   }
 
   return (
     <>
       <div className="contact-footer">
-        <button 
-          className="contact-btn-elegant"
-          onClick={() => setIsOpen(true)}
-        >
+        <button className="contact-btn-elegant" onClick={() => setIsOpen(true)}>
           <span className="contact-icon">💬</span>
           <span className="contact-text">تواصل معنا</span>
         </button>
@@ -2305,51 +2321,26 @@ function ContactFooter() {
           <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
             <div className="contact-modal-header">
               <h2>تواصل معنا</h2>
-              <button 
-                className="close-btn"
-                onClick={() => setIsOpen(false)}
-              >✕</button>
+              <button className="close-btn" onClick={() => setIsOpen(false)}>✕</button>
             </div>
-            
             <div className="contact-modal-body">
               <div className="form-group">
                 <label>الموضوع</label>
-                <input
-                  type="text"
-                  className="contact-input"
-                  placeholder="ما موضوع رسالتك؟"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                />
+                <input type="text" className="contact-input" placeholder="ما موضوع رسالتك؟"
+                  value={subject} onChange={(e) => setSubject(e.target.value)} />
               </div>
-
               <div className="form-group">
                 <label>الرسالة</label>
-                <textarea
-                  className="contact-textarea-modal"
-                  placeholder="أخبرنا برأيك أو ملاحظتك..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows="5"
-                />
+                <textarea className="contact-textarea-modal" placeholder="أخبرنا برأيك أو ملاحظتك..."
+                  value={message} onChange={(e) => setMessage(e.target.value)} rows="5" />
               </div>
-
-              {sent && (
-                <div className="success-message">
-                  ✓ تم إرسال رسالتك بنجاح — شكراً لك
-                </div>
-              )}
+              {sent && <div className="success-message">✓ تم إرسال رسالتك — جزاك الله خيراً</div>}
+              {error && <div style={{ color: "#e55", fontSize: 13, textAlign: "center", marginTop: 8 }}>⚠️ حدث خطأ، حاول مرة أخرى</div>}
             </div>
-
             <div className="contact-modal-footer">
-              <button 
-                className="contact-modal-btn cancel"
-                onClick={() => setIsOpen(false)}
-              >إلغاء</button>
-              <button 
-                className="contact-modal-btn send"
-                onClick={handleSubmit}
-              >إرسال</button>
+              <button className="contact-modal-btn cancel" onClick={() => setIsOpen(false)}>إلغاء</button>
+              <button className="contact-modal-btn send" onClick={handleSubmit} disabled={sending}
+                style={{ opacity: sending ? 0.6 : 1 }}>{sending ? "جارٍ الإرسال..." : "إرسال"}</button>
             </div>
           </div>
         </div>
@@ -2502,34 +2493,24 @@ function SettingsPage({ st, onTheme, onMode, onToggle, onGoal, openShare, onLogo
     const body = (msg || "").trim();
     const subject = "رسالة من تطبيق مزن ✦";
     
-    // استخدام FormData للإرسال الصحيح
-    const form = new FormData();
-    form.append("email", "halfofthird@gmail.com");
-    form.append("subject", subject);
-    form.append("message", body);
-    form.append("name", me.name);
-    form.append("app", "مزن ✦");
-    form.append("date", new Date().toLocaleString('ar-EG'));
-    form.append("_captcha", "false");
-    
-    fetch("https://formsubmit.co/halfofthird@gmail.com", {
+    fetch("https://formsubmit.co/ajax/halfofthird@gmail.com", {
       method: "POST",
-      body: form
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: subject,
+        name: me.name,
+        message: body + `\n\n— من: ${me.name} | التطبيق: مزن ✦ | التاريخ: ${new Date().toLocaleString('ar-SA')}`,
+        _captcha: "false",
+        _template: "table"
+      })
     })
-    .then(response => {
+    .then(res => res.json())
+    .then(data => {
       setSent(true);
-      setTimeout(function () { 
-        setSent(false);
-        setMsg("");
-      }, 2500);
+      setTimeout(function () { setSent(false); setMsg(""); }, 2500);
     })
     .catch(error => {
       console.error("خطأ:", error);
-      setSent(true);
-      setTimeout(function () { 
-        setSent(false);
-        setMsg("");
-      }, 2500);
     });
   }
 
